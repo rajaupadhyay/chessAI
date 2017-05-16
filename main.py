@@ -1,6 +1,6 @@
 import sys
 
-piecesDict = {"ROOK": "R", "KNIGHT": "K", "BISHOP": "B", "QUEEN": "Q", "KING": "K", "PAWN": "P"}
+piecesDict = {"ROOK": "R", "KNIGHT": "K", "BISHOP": "B", "QUEEN": "Q", "KING": "KI", "PAWN": "P"}
 
 for k in piecesDict:
     print(k, piecesDict[k])
@@ -74,6 +74,7 @@ def play():
             print("NO PIECE PRESENT AT THE POSITION SPECIFIED")
 
         counter += 1
+        print("X", end=" ")
         pos = ["a", "b", "c", "d", "e", "f", "g", "h"]
         print(pos, "\n")
 
@@ -101,21 +102,54 @@ def validateAndMove(pieceX, pieceY, targetX, targetY, playerNo):
                     board[pieceX][pieceY] = '_'
                     board[targetX][targetY] = 'p'
 
-        elif board[pieceX][pieceY] == 'k':
+        elif board[pieceX][pieceY] == 'ki':
             if targetY == pieceY or targetY == pieceY-1 or targetY == pieceY+1:
                 if pieceX - targetX == 1:
                     board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = 'k'
+                    board[targetX][targetY] = 'ki'
                 elif pieceX - targetX == 0:
                     board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = 'k'
+                    board[targetX][targetY] = 'ki'
                 elif pieceX - targetX == -1:
                     board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = 'k'
+                    board[targetX][targetY] = 'ki'
                 else:
                     print("INVALID MOVE")
             else:
                 print("INVALID MOVE")
+
+        elif board[pieceX][pieceY] == 'r':
+            if targetX == pieceX:
+                if targetY - pieceY >= 0:
+                    for i in range(abs(targetY-pieceY)-1):
+                        if board[pieceX][pieceY+i+1] != '_':
+                            print("INVALID MOVE")
+                            return
+                    board[pieceX][pieceY] = '_'
+                    board[targetX][targetY] = 'r'
+                else:
+                    for i in range(abs(targetY - pieceY) - 1):
+                        if board[targetX][targetY+i+1] != '_':
+                            print("INVALID MOVE")
+                            return
+                    board[pieceX][pieceY] = '_'
+                    board[targetX][targetY] = 'r'
+            elif targetY == pieceY:
+                if targetX - pieceX >= 0:
+                    for i in range(abs(targetX-pieceX)-1):
+                        if board[pieceX+i+1][pieceY] != '_':
+                            print("INVALID MOVE")
+                            return
+                    board[pieceX][pieceY] = '_'
+                    board[targetX][targetY] = 'r'
+                else:
+                    for i in range(abs(targetX - pieceX) - 1):
+                        if board[targetX+i+1][targetY] != '_':
+                            print("INVALID MOVE")
+                            return
+                    board[pieceX][pieceY] = '_'
+                    board[targetX][targetY] = 'r'
+
 
 ##################################### PLAYER 2 ############################################
 
@@ -137,21 +171,53 @@ def validateAndMove(pieceX, pieceY, targetX, targetY, playerNo):
                     board[pieceX][pieceY] = '_'
                     board[targetX][targetY] = 'P'
 
-        elif board[pieceX][pieceY] == 'K':
+        elif board[pieceX][pieceY] == 'KI':
             if targetY == pieceY or targetY == pieceY - 1 or targetY == pieceY + 1:
                 if pieceX - targetX == 1:
                     board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = 'K'
+                    board[targetX][targetY] = 'KI'
                 elif pieceX - targetX == 0:
                     board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = 'K'
+                    board[targetX][targetY] = 'KI'
                 elif pieceX - targetX == -1:
                     board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = 'K'
+                    board[targetX][targetY] = 'KI'
                 else:
                     print("INVALID MOVE")
             else:
                 print("INVALID MOVE")
+
+        elif board[pieceX][pieceY] == 'R':
+            if targetX == pieceX:
+                if targetY - pieceY >= 0:
+                    for i in range(abs(targetY - pieceY) - 1):
+                        if board[pieceX][pieceY + i + 1] != '_':
+                            print("INVALID MOVE")
+                            return
+                    board[pieceX][pieceY] = '_'
+                    board[targetX][targetY] = 'R'
+                else:
+                    for i in range(abs(targetY - pieceY) - 1):
+                        if board[targetX][targetY + i + 1] != '_':
+                            print("INVALID MOVE")
+                            return
+                    board[pieceX][pieceY] = '_'
+                    board[targetX][targetY] = 'R'
+            elif targetY == pieceY:
+                if targetX - pieceX < 0:
+                    for i in range(abs(targetX - pieceX) - 1):
+                        if board[pieceX - i - 1][pieceY] != '_':
+                            print("INVALID MOVE")
+                            return
+                    board[pieceX][pieceY] = '_'
+                    board[targetX][targetY] = 'R'
+                else:
+                    for i in range(abs(targetX - pieceX) - 1):
+                        if board[targetX - i - 1][targetY] != '_':
+                            print("INVALID MOVE")
+                            return
+                    board[pieceX][pieceY] = '_'
+                    board[targetX][targetY] = 'R'
 
 
 
