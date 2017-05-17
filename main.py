@@ -150,6 +150,44 @@ def validateAndMove(pieceX, pieceY, targetX, targetY, playerNo):
                     board[pieceX][pieceY] = '_'
                     board[targetX][targetY] = 'r'
 
+        elif board[pieceX][pieceY] == 'b':
+            if abs(pieceX-targetX) == abs(pieceY-targetY):
+                print(pieceX, targetX)
+                if targetX < pieceX:
+                    if targetY < pieceY:
+                        for x in range(pieceX - targetX - 1):
+                            if board[pieceX-x-1][pieceY-x-1] != '_':
+                                print("INVALID MOVE")
+                                return
+                        board[pieceX][pieceY] = '_'
+                        board[targetX][targetY] = 'b'
+                    else:
+                        for x in range(pieceX - targetX - 1):
+                            if board[pieceX-x-1][pieceY+x+1] != '_':
+                                print("INVALID MOVE")
+                                return
+                        board[pieceX][pieceY] = '_'
+                        board[targetX][targetY] = 'b'
+                else:
+                    if targetY < pieceY:
+                        print("YES")
+                        for x in range(targetX - pieceX - 1):
+                            if board[pieceX+x+1][pieceY-x-1] != '_':
+                                print("INVALID MOVE")
+                                return
+                        board[pieceX][pieceY] = '_'
+                        board[targetX][targetY] = 'b'
+                    else:
+                        for x in range(targetX - pieceX - 1):
+                            if board[pieceX+x+1][pieceY+x+1] != '_':
+                                print("INVALID MOVE")
+                                return
+                        board[pieceX][pieceY] = '_'
+                        board[targetX][targetY] = 'b'
+            else:
+                print("INVALID MOVE")
+
+
 
 ##################################### PLAYER 2 ############################################
 
@@ -218,6 +256,41 @@ def validateAndMove(pieceX, pieceY, targetX, targetY, playerNo):
                             return
                     board[pieceX][pieceY] = '_'
                     board[targetX][targetY] = 'R'
+
+        elif board[pieceX][pieceY] == 'B':
+            if abs(pieceX - targetX) == abs(pieceY - targetY):
+                if targetX < pieceX:
+                    if targetY < pieceY:
+                        for x in range(pieceX - targetX - 1):
+                            if board[pieceX - x - 1][pieceY - x - 1] != '_':
+                                print("INVALID MOVE")
+                                return
+                        board[pieceX][pieceY] = '_'
+                        board[targetX][targetY] = 'B'
+                    else:
+                        for x in range(pieceX - targetX - 1):
+                            if board[pieceX - x - 1][pieceY + x + 1] != '_':
+                                print("INVALID MOVE")
+                                return
+                        board[pieceX][pieceY] = '_'
+                        board[targetX][targetY] = 'B'
+                else:
+                    if targetY < pieceY:
+                        for x in range(targetX - pieceX - 1):
+                            if board[pieceX + x + 1][pieceY - x - 1] != '_':
+                                print("INVALID MOVE")
+                                return
+                        board[pieceX][pieceY] = '_'
+                        board[targetX][targetY] = 'B'
+                    else:
+                        for x in range(targetX - pieceX - 1):
+                            if board[pieceX + x + 1][pieceY + x + 1] != '_':
+                                print("INVALID MOVE")
+                                return
+                        board[pieceX][pieceY] = '_'
+                        board[targetX][targetY] = 'B'
+            else:
+                print("INVALID MOVE")
 
 
 
