@@ -1,15 +1,19 @@
 import sys
+import gui
+import pygame
+from pygame.locals import *
 
 piecesDict = {"ROOK": "R", "KNIGHT": "K", "BISHOP": "B", "QUEEN": "Q", "KING": "KI", "PAWN": "P"}
 
-for k in piecesDict:
-    print(k, piecesDict[k])
+# for k in piecesDict:
+#     print(k, piecesDict[k])
 
 counter = 0
 board = []
+
+
 # WHITE PIECES ARE LOWERCASE AND BLACK PIECES ARE UPPERCASE
 def initialise():
-
     row8 = [piecesDict["ROOK"].lower(), piecesDict["KNIGHT"].lower(), piecesDict["BISHOP"].lower(),
             piecesDict["QUEEN"].lower(), piecesDict["KING"].lower(),
             piecesDict["BISHOP"].lower(), piecesDict["KNIGHT"].lower(), piecesDict["ROOK"].lower()]
@@ -33,7 +37,8 @@ def initialise():
 
 
 def play():
-    while(True): # Implement while(boardCheck()) where boardCheck() checks if game has ended
+    game = gui.ChessGUI_pygame()
+    while (True):  # Implement while(boardCheck()) where boardCheck() checks if game has ended
         global counter
         if counter % 2 == 0:
             print("PLAYER 1s TURN (WHITE)")
@@ -48,6 +53,7 @@ def play():
         piecePosx = int(stringVal[1]) - 1
         targetPosy = ord(stringVal[2]) - ord('a')
         targetPosx = int(stringVal[3]) - 1
+
         # CHECK IF POSITIONS DEFINED ARE VALID
 
         if board[piecePosx][piecePosy] != '_' and flag == 1:
@@ -82,12 +88,14 @@ def play():
             print(i + 1, end=" ")
             print(board[i])
 
+        game.Draw(board)
+
 
 def validateAndMove(pieceX, pieceY, targetX, targetY, playerNo):
     if playerNo == 1:
         if board[pieceX][pieceY] == 'p':
             if targetY == pieceY:
-                if board[pieceX+1][pieceY] == '_':
+                if board[pieceX + 1][pieceY] == '_':
                     if pieceX == 1 and targetX == 3:
                         board[pieceX][pieceY] = '_'
                         board[targetX][targetY] = 'p'
@@ -103,7 +111,7 @@ def validateAndMove(pieceX, pieceY, targetX, targetY, playerNo):
                     board[targetX][targetY] = 'p'
 
         elif board[pieceX][pieceY] == 'ki':
-            if targetY == pieceY or targetY == pieceY-1 or targetY == pieceY+1:
+            if targetY == pieceY or targetY == pieceY - 1 or targetY == pieceY + 1:
                 if pieceX - targetX == 1:
                     board[pieceX][pieceY] = '_'
                     board[targetX][targetY] = 'ki'
@@ -121,30 +129,30 @@ def validateAndMove(pieceX, pieceY, targetX, targetY, playerNo):
         elif board[pieceX][pieceY] == 'r':
             if targetX == pieceX:
                 if targetY - pieceY >= 0:
-                    for i in range(abs(targetY-pieceY)-1):
-                        if board[pieceX][pieceY+i+1] != '_':
+                    for i in range(abs(targetY - pieceY) - 1):
+                        if board[pieceX][pieceY + i + 1] != '_':
                             print("INVALID MOVE")
                             return
                     board[pieceX][pieceY] = '_'
                     board[targetX][targetY] = 'r'
                 else:
                     for i in range(abs(targetY - pieceY) - 1):
-                        if board[targetX][targetY+i+1] != '_':
+                        if board[targetX][targetY + i + 1] != '_':
                             print("INVALID MOVE")
                             return
                     board[pieceX][pieceY] = '_'
                     board[targetX][targetY] = 'r'
             elif targetY == pieceY:
                 if targetX - pieceX >= 0:
-                    for i in range(abs(targetX-pieceX)-1):
-                        if board[pieceX+i+1][pieceY] != '_':
+                    for i in range(abs(targetX - pieceX) - 1):
+                        if board[pieceX + i + 1][pieceY] != '_':
                             print("INVALID MOVE")
                             return
                     board[pieceX][pieceY] = '_'
                     board[targetX][targetY] = 'r'
                 else:
                     for i in range(abs(targetX - pieceX) - 1):
-                        if board[targetX+i+1][targetY] != '_':
+                        if board[targetX + i + 1][targetY] != '_':
                             print("INVALID MOVE")
                             return
                     board[pieceX][pieceY] = '_'
@@ -152,19 +160,19 @@ def validateAndMove(pieceX, pieceY, targetX, targetY, playerNo):
 
         elif board[pieceX][pieceY] == 'b' or board[pieceX][pieceY] == 'q':
             buffer = board[pieceX][pieceY]
-            if abs(pieceX-targetX) == abs(pieceY-targetY):
+            if abs(pieceX - targetX) == abs(pieceY - targetY):
                 print(pieceX, targetX)
                 if targetX < pieceX:
                     if targetY < pieceY:
                         for x in range(pieceX - targetX - 1):
-                            if board[pieceX-x-1][pieceY-x-1] != '_':
+                            if board[pieceX - x - 1][pieceY - x - 1] != '_':
                                 print("INVALID MOVE")
                                 return
                         board[pieceX][pieceY] = '_'
                         board[targetX][targetY] = buffer
                     else:
                         for x in range(pieceX - targetX - 1):
-                            if board[pieceX-x-1][pieceY+x+1] != '_':
+                            if board[pieceX - x - 1][pieceY + x + 1] != '_':
                                 print("INVALID MOVE")
                                 return
                         board[pieceX][pieceY] = '_'
@@ -173,14 +181,14 @@ def validateAndMove(pieceX, pieceY, targetX, targetY, playerNo):
                     if targetY < pieceY:
                         print("YES")
                         for x in range(targetX - pieceX - 1):
-                            if board[pieceX+x+1][pieceY-x-1] != '_':
+                            if board[pieceX + x + 1][pieceY - x - 1] != '_':
                                 print("INVALID MOVE")
                                 return
                         board[pieceX][pieceY] = '_'
                         board[targetX][targetY] = buffer
                     else:
                         for x in range(targetX - pieceX - 1):
-                            if board[pieceX+x+1][pieceY+x+1] != '_':
+                            if board[pieceX + x + 1][pieceY + x + 1] != '_':
                                 print("INVALID MOVE")
                                 return
                         board[pieceX][pieceY] = '_'
@@ -239,7 +247,7 @@ def validateAndMove(pieceX, pieceY, targetX, targetY, playerNo):
 
 
 
-##################################### PLAYER 2 ############################################
+            ##################################### PLAYER 2 ############################################
 
     else:
         if board[pieceX][pieceY] == 'P':
@@ -386,8 +394,11 @@ def validateAndMove(pieceX, pieceY, targetX, targetY, playerNo):
                 board[targetX][targetY] = 'K'
             else:
                 print("INVALID MOVE")
+                # game.Draw(board)
 
 
 if __name__ == "__main__":
+    game = gui.ChessGUI_pygame()
+    game.Draw(board)
     initialise()
     play()
