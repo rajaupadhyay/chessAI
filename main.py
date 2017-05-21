@@ -43,9 +43,11 @@ def play():
         global counter
         if counter % 2 == 0:
             print("PLAYER 1s TURN (WHITE)")
+            game.PrintMessage("BLACK TO PLAY") #Alternate
             flag = 1
         else:
             print("PLAYER 2s TURN (BLACK)")
+            game.PrintMessage("WHITE TO PLAY")
             flag = 2
 
         # GET USER INPUT - piece coordinates and the target coordinates - b7b5
@@ -70,15 +72,9 @@ def play():
             e = pygame.event.wait()
             if e.type is MOUSEBUTTONDOWN:
                 (mouseX, mouseY) = pygame.mouse.get_pos()
-                (mouseX, mouseY) = pygame.mouse.get_pos()
                 targetPosx, targetPosy = game.GetClickedSquare(mouseX, mouseY)
                 targetPosx, targetPosy = math.floor(targetPosx), math.floor(targetPosy)
                 x = 1
-
-
-
-
-
 
 
         # CHECK IF POSITIONS DEFINED ARE VALID
@@ -274,7 +270,7 @@ def validateAndMove(pieceX, pieceY, targetX, targetY, playerNo):
 
 
 
-            ##################################### PLAYER 2 ############################################
+            ##################################### PLAYER 2 #########################################
 
     else:
         if board[pieceX][pieceY] == 'P':
@@ -426,14 +422,14 @@ def validateAndMove(pieceX, pieceY, targetX, targetY, playerNo):
 
 if __name__ == "__main__":
     game = gui.ChessGUI_pygame()
-    testBoard = [['R', 'K', 'B', 'Q', 'KI', 'B', 'K', 'R'], \
-                 ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'], \
-                 ['e', 'e', 'e', 'e', 'e', 'e', 'e', 'e'], \
-                 ['e', 'e', 'e', 'e', 'e', 'e', 'e', 'e'], \
-                 ['e', 'e', 'e', 'e', 'e', 'e', 'e', 'e'], \
-                 ['e', 'e', 'e', 'e', 'e', 'e', 'e', 'e'], \
-                 ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'], \
-                 ['r', 'k', 'b', 'q', 'ki', 'b', 'k', 'r']]
+    testBoard = [['r', 'k', 'b', 'q', 'ki', 'b', 'k', 'r'],
+                 ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+                 ['e', 'e', 'e', 'e', 'e', 'e', 'e', 'e'],
+                 ['e', 'e', 'e', 'e', 'e', 'e', 'e', 'e'],
+                 ['e', 'e', 'e', 'e', 'e', 'e', 'e', 'e'],
+                 ['e', 'e', 'e', 'e', 'e', 'e', 'e', 'e'],
+                 ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+                 ['R', 'K', 'B', 'Q', 'KI', 'B', 'K', 'R']]
 
     game.Draw(testBoard)
     initialise()
