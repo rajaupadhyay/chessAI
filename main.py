@@ -3,7 +3,7 @@ import gui
 import pygame
 from pygame.locals import *
 import math
-
+import os
 piecesDict = {"ROOK": "R", "KNIGHT": "K", "BISHOP": "B", "QUEEN": "Q", "KING": "KI", "PAWN": "P"}
 
 # for k in piecesDict:
@@ -11,7 +11,6 @@ piecesDict = {"ROOK": "R", "KNIGHT": "K", "BISHOP": "B", "QUEEN": "Q", "KING": "
 
 counter = 0
 board = []
-
 
 # WHITE PIECES ARE LOWERCASE AND BLACK PIECES ARE UPPERCASE
 def initialise():
@@ -36,18 +35,23 @@ def initialise():
         print(i + 1, end=" ")
         print(board[i])
 
-
+replay = 0
 def play():
     game = gui.ChessGUI_pygame()
-    while (True):  # Implement while(boardCheck()) where boardCheck() checks if game has ended
+    while True:  # Implement while(boardCheck()) where boardCheck() checks if game has ended
         global counter
+        global replay
+        print(counter)
+
         if counter % 2 == 0:
             print("PLAYER 1s TURN (WHITE)")
             game.PrintMessage("BLACK TO PLAY") #Alternate
+            player = "WHITE"
             flag = 1
         else:
             print("PLAYER 2s TURN (BLACK)")
             game.PrintMessage("WHITE TO PLAY")
+            player = "BLACK"
             flag = 2
 
         # GET USER INPUT - piece coordinates and the target coordinates - b7b5
@@ -57,14 +61,23 @@ def play():
         # targetPosy = ord(stringVal[2]) - ord('a')
         # targetPosx = int(stringVal[3]) - 1
         x=0
-        while(x==0):
+        while(x == 0):
             pygame.event.set_blocked(MOUSEMOTION)
             e = pygame.event.wait()
             if e.type is MOUSEBUTTONDOWN:
                 (mouseX, mouseY) = pygame.mouse.get_pos()
                 piecePosx, piecePosy = game.GetClickedSquare(mouseX, mouseY)
                 piecePosx, piecePosy = math.floor(piecePosx), math.floor(piecePosy)
-                x=1
+                if piecePosx == -1 and piecePosy == -1:
+                    print("ERROR1")
+                    game.PrintMessage("INVALID - {} TRY AGAIN".format(player))
+                    counter -= 1
+                x = 1
+            if e.type is QUIT:  # the "x" kill button
+                pygame.quit()
+                sys.exit(0)
+
+
 
         x = 0
         while (x == 0):
@@ -74,7 +87,15 @@ def play():
                 (mouseX, mouseY) = pygame.mouse.get_pos()
                 targetPosx, targetPosy = game.GetClickedSquare(mouseX, mouseY)
                 targetPosx, targetPosy = math.floor(targetPosx), math.floor(targetPosy)
+                if targetPosx == -1 and targetPosy == -1:
+                    print("ERROR2")
+                    game.PrintMessage("INVALID - {} TRY AGAIN".format(player))
+                    counter -= 1
                 x = 1
+            if e.type is QUIT:  # the "x" kill button
+                pygame.quit()
+                sys.exit(0)
+
 
 
         # CHECK IF POSITIONS DEFINED ARE VALID
@@ -202,7 +223,6 @@ def validateAndMove(pieceX, pieceY, targetX, targetY, playerNo):
                         board[targetX][targetY] = buffer
                 else:
                     if targetY < pieceY:
-                        print("YES")
                         for x in range(targetX - pieceX - 1):
                             if board[pieceX + x + 1][pieceY - x - 1] != '_':
                                 print("INVALID MOVE")
