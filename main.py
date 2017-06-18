@@ -4,6 +4,7 @@ import pygame
 from pygame.locals import *
 import math
 import os
+import copy
 piecesDict = {"ROOK": "R", "KNIGHT": "K", "BISHOP": "B", "QUEEN": "Q", "KING": "KI", "PAWN": "P"}
 
 # for k in piecesDict:
@@ -41,8 +42,9 @@ def play():
     while True:  # Implement while(boardCheck()) where boardCheck() checks if game has ended
         global counter
         global replay
+        global board
         print(counter)
-
+        occ = 0
         if counter % 2 == 0:
             print("PLAYER 1s TURN (WHITE)")
             game.PrintMessage("BLACK TO PLAY") #Alternate
@@ -96,17 +98,28 @@ def play():
                 pygame.quit()
                 sys.exit(0)
 
-
-
+        buffer = board[targetPosx][targetPosy]
         # CHECK IF POSITIONS DEFINED ARE VALID
-
+        boardCopy = copy.deepcopy(board)
         if board[piecePosx][piecePosy] != '_' and flag == 1:
             if board[piecePosx][piecePosy].islower():
                 # Logic for moving to target pos (new func)
                 if board[targetPosx][targetPosy].islower() and board[targetPosx][targetPosy] != '_':
                     print("CAN NOT MOVE PIECE TO SPECIFIED COORDINATES (PREOCCUPIED BY YOUR PIECE)")
+                    game.PrintMessage("INVALID - {} TRY AGAIN".format(player))
+                    occ = 1
+                    counter -= 1
                 else:
                     validateAndMove(piecePosx, piecePosy, targetPosx, targetPosy, flag)
+                    checkVal = checkKingSafe(board,flag)
+                    if checkVal == 1:
+                        board = boardCopy
+                        game.PrintMessage("INVALID (CHECKED) - {} TRY AGAIN".format(player))
+                        print("CHECKED - PLAY TO PROTECT KING")
+                        occ = 1
+                        counter -= 1
+
+
             else:
                 print("YOU CAN NOT MOVE YOUR OPPONENTS PIECE")
 
@@ -115,13 +128,28 @@ def play():
                 # Logic for moving to target pos (new func)
                 if board[targetPosx][targetPosy].isupper():
                     print("CAN NOT MOVE PIECE TO SPECIFIED COORDINATES (PREOCCUPIED BY YOUR PIECE)")
+                    game.PrintMessage("INVALID - {} TRY AGAIN".format(player))
+                    occ = 1
+                    counter -= 1
                 else:
                     validateAndMove(piecePosx, piecePosy, targetPosx, targetPosy, flag)
+                    checkVal = checkKingSafe(board, flag)
+                    if checkVal == 1:
+                        board = boardCopy
+                        game.PrintMessage("INVALID (CHECKED) - {} TRY AGAIN".format(player))
+                        print("CHECKED - PLAY TO PROTECT KING")
+                        occ = 1
+                        counter -= 1
             else:
                 print("YOU CAN NOT MOVE YOUR OPPONENTS PIECE")
 
         else:
             print("NO PIECE PRESENT AT THE POSITION SPECIFIED")
+
+        if board[targetPosx][targetPosy] == buffer and occ == 0:
+            game.PrintMessage("INVALID - {} TRY AGAIN".format(player))
+            counter -= 1
+
 
         counter += 1
         print("X", end=" ")
@@ -283,13 +311,6 @@ def validateAndMove(pieceX, pieceY, targetX, targetY, playerNo):
             else:
                 print("INVALID MOVE")
 
-
-
-
-
-
-
-
             ##################################### PLAYER 2 #########################################
 
     else:
@@ -440,6 +461,311 @@ def validateAndMove(pieceX, pieceY, targetX, targetY, playerNo):
                 # game.Draw(board)
 
 
+#############################################################################################################################################
+# Function checks if the king is under attack - returns 1 if True else 0
+def checkKingSafe(board1, playerNo):
+    KINGX, KINGY = -1,-1
+    if playerNo == 1:
+        for i in range(8):
+            if 'ki' in board1[i]:
+                KINGX, KINGY = i, board1[i].index('ki')
+
+        if KINGX + 1 < 8:
+            if KINGY - 1 >= 0:
+                if board1[KINGX+1][KINGY-1] == 'P':
+                    print('here1')
+                    return 1
+            if KINGY + 1 < 8:
+                if board1[KINGX+1][KINGY+1] == 'P':
+                    print('here2')
+                    return 1
+
+
+        leftY = KINGY-1
+        if leftY >=0:
+            while leftY>0 and board1[KINGX][leftY] == '_':
+                leftY -= 1
+            if board1[KINGX][leftY] == 'R' or board1[KINGX][leftY] == 'Q':
+                print('here3')
+                return 1
+
+        rightY = KINGY+1
+        if rightY<8:
+            while rightY<7 and board1[KINGX][rightY] == '_':
+                rightY += 1
+            if board1[KINGX][rightY] == 'R' or board1[KINGX][leftY] == 'Q':
+                print('here4')
+                return 1
+
+        top = KINGX-1
+        if top>=0:
+            while top>0 and board1[top][KINGY] == '_':
+                top -= 1
+            if board1[top][KINGY] == 'R' or board1[top][KINGY] == 'Q':
+                print('here5')
+                return 1
+
+        bottom = KINGX+1
+        if bottom <8:
+            while bottom<7 and board1[bottom][KINGY] == '_':
+                bottom += 1
+            if board1[bottom][KINGY] == 'R' or board1[bottom][KINGY] == 'Q':
+                print('here6')
+                return 1
+
+        # DIAGONAL CHECKS FOR OPPONENTS ATTACKING QUEEN OR BISHOP
+        topDiagonalX, topRightDiagonalY = KINGX-1, KINGY+1
+        if topDiagonalX>=0 and topRightDiagonalY<8:
+            while topDiagonalX>0 and topRightDiagonalY<7 and board1[topDiagonalX][topRightDiagonalY] == '_':
+                topDiagonalX -= 1
+                topRightDiagonalY += 1
+            print(topDiagonalX, topRightDiagonalY)
+            if board1[topDiagonalX][topRightDiagonalY] == 'B' or board1[topDiagonalX][topRightDiagonalY] == 'Q':
+                print('here7')
+                return 1
+
+        topDiagonalX, topLeftDiagonalY = KINGX-1, KINGY-1
+        if topDiagonalX>=0 and topLeftDiagonalY>=0:
+            while topDiagonalX>0 and topLeftDiagonalY>0 and board1[topDiagonalX][topLeftDiagonalY] == '_':
+                topDiagonalX -= 1
+                topLeftDiagonalY -= 1
+            if board1[topDiagonalX][topLeftDiagonalY] == 'B' or board1[topDiagonalX][topLeftDiagonalY] == 'Q':
+                print('here8')
+                return 1
+
+        bottomDiagonalX, bottomRightDiagonalY = KINGX+1, KINGY+1
+        if bottomDiagonalX <8 and bottomRightDiagonalY<8:
+            while bottomDiagonalX<7 and bottomRightDiagonalY<7 and board1[bottomDiagonalX][bottomRightDiagonalY] == '_':
+                bottomDiagonalX += 1
+                bottomRightDiagonalY += 1
+            if board1[bottomDiagonalX][bottomRightDiagonalY] == 'B' or board1[bottomDiagonalX][bottomRightDiagonalY] == 'Q':
+                print('here9')
+                return 1
+
+        bottomDiagonalX, bottomLeftDiagonalY = KINGX+1, KINGY-1
+        if bottomDiagonalX<8 and bottomLeftDiagonalY>=0:
+            while bottomDiagonalX<7 and bottomLeftDiagonalY>0 and board1[bottomDiagonalX][bottomLeftDiagonalY] == '_':
+                bottomDiagonalX += 1
+                bottomLeftDiagonalY -= 1
+            if board1[bottomDiagonalX][bottomLeftDiagonalY] == 'B' or board1[bottomDiagonalX][bottomLeftDiagonalY] == 'Q':
+                print('here10')
+                return 1
+
+        if KINGY-1>=0:
+            if board1[KINGX][KINGY-1] == 'KI':
+                print('here11')
+                return 1
+
+        if KINGY+1<8:
+            if board1[KINGX][KINGY+1] == 'KI':
+                print('here12')
+                return 1
+
+        if KINGX-1>=0:
+            if KINGY-1>=0:
+                if board1[KINGX-1][KINGY-1] == 'KI':
+                    print('here13')
+                    return 1
+            if KINGY+1<8:
+                if board1[KINGX-1][KINGY+1] == 'KI':
+                    print('here14')
+                    return 1
+            if board1[KINGX-1][KINGY] == 'KI':
+                print('here15')
+                return 1
+
+        if KINGX+1<8:
+            if board1[KINGX+1][KINGY] == 'KI':
+                print('here16')
+                return 1
+            if KINGY-1>=0:
+                if board1[KINGX+1][KINGY-1] == 'KI':
+                    print('here17')
+                    return 1
+            if KINGY+1<8:
+                if board1[KINGX+1][KINGY+1] == 'KI':
+                    print('here18')
+                    return 1
+
+        if KINGY-1>=0:
+            if KINGX-2>=0:
+                if board1[KINGX-2][KINGY-1] == 'K':
+                    print('here19')
+                    return 1
+            if KINGX+2<8:
+                if board1[KINGX+2][KINGY-1] == 'K':
+                    print('here20')
+                    return 1
+        if KINGY-2>=0:
+            if KINGX-1>=0:
+                if board1[KINGX-1][KINGY-2] == 'K':
+                    print('here21')
+                    return 1
+            if KINGX+1<8:
+                if board1[KINGX+1][KINGY-2] == 'K':
+                    print('here22')
+                    return 1
+
+        if KINGY+1<8:
+            if KINGX-2>=0:
+                if board1[KINGX-2][KINGY+1] == 'K':
+                    print('here23')
+                    return 1
+            if KINGX+2<8:
+                if board1[KINGX+2][KINGY+1] == 'K':
+                    print('here24')
+                    return 1
+
+        if KINGY+2<8:
+            if KINGX-1>=0:
+                if board1[KINGX-1][KINGY+2] == 'K':
+                    print('here25')
+                    return 1
+            if KINGX+1<8:
+                if board1[KINGX+1][KINGY+2] == 'K':
+                    print('here26')
+                    return 1
+
+        return 0
+    # PLAYER 2
+    else:
+        for i in range(8):
+            if 'KI' in board1[i]:
+                KINGX, KINGY = i, board1[i].index('KI')
+
+        if KINGX - 1 >= 0:
+            if KINGY-1>=0:
+                if board1[KINGX-1][KINGY-1] == 'p':
+                    return 1
+            if KINGY+1<8:
+                if board1[KINGX-1][KINGY+1] == 'p':
+                    return 1
+
+        leftY = KINGY - 1
+        if leftY>=0:
+            while leftY > 0 and board1[KINGX][leftY] == '_':
+                leftY -= 1
+            if board1[KINGX][leftY] == 'r' or board1[KINGX][leftY] == 'q':
+                return 1
+
+        rightY = KINGY + 1
+        if rightY<8:
+            while rightY < 7 and board1[KINGX][rightY] == '_':
+                rightY += 1
+            if board1[KINGX][rightY] == 'r' or board1[KINGX][leftY] == 'q':
+                return 1
+
+        top = KINGX - 1
+        if top>=0:
+            while top > 0 and board1[top][KINGY] == '_':
+                top -= 1
+            if board1[top][KINGY] == 'r' or board1[top][KINGY] == 'q':
+                return 1
+
+        bottom = KINGX + 1
+        if bottom <8:
+            while bottom < 7 and board1[bottom][KINGY] == '_':
+                bottom += 1
+            if board1[bottom][KINGY] == 'r' or board1[bottom][KINGY] == 'q':
+                return 1
+
+        # DIAGONAL CHECKS FOR OPPONENTS ATTACKING QUEEN OR BISHOP
+        topDiagonalX, topRightDiagonalY = KINGX - 1, KINGY + 1
+        if topDiagonalX>0 and topRightDiagonalY<8:
+            while topDiagonalX > 0 and topRightDiagonalY < 7 and board1[topDiagonalX][topRightDiagonalY] == '_':
+                topDiagonalX -= 1
+                topRightDiagonalY += 1
+            print(topDiagonalX, topRightDiagonalY)
+            if board1[topDiagonalX][topRightDiagonalY-1] == 'b' or board1[topDiagonalX][topRightDiagonalY-1] == 'q':
+                return 1
+
+        topDiagonalX, topLeftDiagonalY = KINGX - 1, KINGY - 1
+        if topDiagonalX>=0 and topLeftDiagonalY>=0:
+            while topDiagonalX > 0 and topLeftDiagonalY > 0 and board1[topDiagonalX][topLeftDiagonalY] == '_':
+                topDiagonalX -= 1
+                topLeftDiagonalY -= 1
+            if board1[topDiagonalX][topLeftDiagonalY] == 'b' or board1[topDiagonalX][topLeftDiagonalY] == 'q':
+                return 1
+
+        bottomDiagonalX, bottomRightDiagonalY = KINGX + 1, KINGY + 1
+        if bottomDiagonalX<8 and bottomRightDiagonalY<8:
+            while bottomDiagonalX < 7 and bottomRightDiagonalY < 7 and board1[bottomDiagonalX][bottomRightDiagonalY] == '_':
+                bottomDiagonalX += 1
+                bottomRightDiagonalY += 1
+            if board1[bottomDiagonalX][bottomRightDiagonalY] == 'b' or board1[bottomDiagonalX][bottomRightDiagonalY] == 'q':
+                return 1
+
+        bottomDiagonalX, bottomLeftDiagonalY = KINGX + 1, KINGY - 1
+        if bottomDiagonalX<8 and bottomLeftDiagonalY>=0:
+            while bottomDiagonalX < 7 and bottomLeftDiagonalY > 0 and board1[bottomDiagonalX][bottomLeftDiagonalY] == '_':
+                bottomDiagonalX += 1
+                bottomLeftDiagonalY -= 1
+            if board1[bottomDiagonalX][bottomLeftDiagonalY] == 'b' or board1[bottomDiagonalX][bottomLeftDiagonalY] == 'q':
+                return 1
+
+        if KINGY - 1 >= 0:
+            if board1[KINGX][KINGY - 1] == 'ki':
+                return 1
+
+        if KINGY + 1 < 8:
+            if board1[KINGX][KINGY + 1] == 'ki':
+                return 1
+
+        if KINGX - 1 >= 0:
+            if KINGY - 1 >= 0:
+                if board1[KINGX - 1][KINGY - 1] == 'ki':
+                    return 1
+            if KINGY + 1 < 8:
+                if board1[KINGX - 1][KINGY + 1] == 'ki':
+                    return 1
+            if board1[KINGX - 1][KINGY] == 'ki':
+                return 1
+
+        if KINGX + 1 < 8:
+            if board1[KINGX + 1][KINGY] == 'ki':
+                return 1
+            if KINGY - 1 >= 0:
+                if board1[KINGX + 1][KINGY - 1] == 'ki':
+                    return 1
+            if KINGY + 1 < 8:
+                if board1[KINGX + 1][KINGY + 1] == 'ki':
+                    return 1
+
+        if KINGY - 1 >= 0:
+            if KINGX - 2 >= 0:
+                if board1[KINGX - 2][KINGY - 1] == 'k':
+                    return 1
+            if KINGX + 2 < 8:
+                if board1[KINGX + 2][KINGY - 1] == 'k':
+                    return 1
+        if KINGY - 2 >= 0:
+            if KINGX - 1 >= 0:
+                if board1[KINGX - 1][KINGY - 2] == 'k':
+                    return 1
+            if KINGX + 1 < 8:
+                if board1[KINGX + 1][KINGY - 2] == 'k':
+                    return 1
+
+        if KINGY + 1 < 8:
+            if KINGX - 2 >= 0:
+                if board1[KINGX - 2][KINGY + 1] == 'k':
+                    return 1
+            if KINGX + 2 < 8:
+                if board1[KINGX + 2][KINGY + 1] == 'k':
+                    return 1
+
+        if KINGY + 2 < 8:
+            if KINGX - 1 >= 0:
+                if board1[KINGX - 1][KINGY + 2] == 'k':
+                    return 1
+            if KINGX + 1 < 8:
+                if board1[KINGX + 1][KINGY + 2] == 'k':
+                    return 1
+
+        return 0
+
+
+#############################################################################################################################################
 if __name__ == "__main__":
     game = gui.ChessGUI_pygame()
     testBoard = [['r', 'k', 'b', 'q', 'ki', 'b', 'k', 'r'],

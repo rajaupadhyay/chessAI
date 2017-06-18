@@ -64,7 +64,7 @@ class ScrollingTextBox:
         xpos = self.xmin
         ypos = self.ymin
         color = (255, 255, 255)  # white
-        antialias = 1  # evidently, for some people rendering text fails when antialiasing is off
+        antialias = 1
         for line in self.lines:
             renderedLine = self.fontDefault.render(line, antialias, color)
             self.screen.blit(renderedLine, (xpos, ypos))

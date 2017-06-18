@@ -99,7 +99,7 @@ class ChessGUI_pygame:
     def Draw(self, board):
         self.screen.fill((0, 0, 0))
         self.textBox.Draw()
-        boardSize = len(board)  # board should be square.  boardSize should be always 8 for chess, but I dislike "magic numbers" :)
+        boardSize = len(board)
 
         # draw blank board
         current_square = 0
@@ -177,18 +177,18 @@ class ChessGUI_pygame:
 
         pygame.display.flip()
 
-    def EndGame(self, board):
-        self.PrintMessage("Press any key to exit.")
-        self.Draw(board)  # draw board to show end game status
-        pygame.event.set_blocked(MOUSEMOTION)
-        while 1:
-            e = pygame.event.wait()
-            if e.type is KEYDOWN:
-                pygame.quit()
-                sys.exit(0)
-            if e.type is QUIT:
-                pygame.quit()
-                sys.exit(0)
+    # def EndGame(self, board):
+    #     self.PrintMessage("Press any key to exit.")
+    #     self.Draw(board)  # draw board to show end game status
+    #     pygame.event.set_blocked(MOUSEMOTION)
+    #     while 1:
+    #         e = pygame.event.wait()
+    #         if e.type is KEYDOWN:
+    #             pygame.quit()
+    #             sys.exit(0)
+    #         if e.type is QUIT:
+    #             pygame.quit()
+    #             sys.exit(0)
 
     # def GetPlayerInput(self, board, currentColor):
     #     # returns ((from_row,from_col),(to_row,to_col))
@@ -260,29 +260,31 @@ class ChessGUI_pygame:
         (row, col) = self.ConvertToChessCoords((mouseX, mouseY))
         if col < 8 and col >= 0 and row < 8 and row >= 0:
             print("  Chess board units row =", math.floor(row), "col =", math.floor(col))
-        return row, col
+            return row, col
+        else:
+            return -1, -1
 
-    def TestRoutine(self):
-        # test function
-        pygame.event.set_blocked(MOUSEMOTION)
-        while 1:
-            e = pygame.event.wait()
-            if e.type is QUIT:
-                return
-            if e.type is KEYDOWN:
-                if e.key is K_ESCAPE:
-                    pygame.quit()
-                    return
-            if e.type is MOUSEBUTTONDOWN:
-                (mouseX, mouseY) = pygame.mouse.get_pos()
-                # x is horizontal, y is vertical
-                # (x=0,y=0) is upper-left corner of the screen
-                x, y = self.GetClickedSquare(mouseX, mouseY)
-                x, y = math.floor(x), math.floor(y)
-                (mouseX, mouseY) = pygame.mouse.get_pos()
-                a, b = self.GetClickedSquare(mouseX, mouseY)
-                a, b = math.floor(a), math.floor(b)
-                main.play(x, y, a, b)
+    # def TestRoutine(self):
+    #     # test function
+    #     pygame.event.set_blocked(MOUSEMOTION)
+    #     while 1:
+    #         e = pygame.event.wait()
+    #         if e.type is QUIT:
+    #             return
+    #         if e.type is KEYDOWN:
+    #             if e.key is K_ESCAPE:
+    #                 pygame.quit()
+    #                 return
+    #         if e.type is MOUSEBUTTONDOWN:
+    #             (mouseX, mouseY) = pygame.mouse.get_pos()
+    #             # x is horizontal, y is vertical
+    #             # (x=0,y=0) is upper-left corner of the screen
+    #             x, y = self.GetClickedSquare(mouseX, mouseY)
+    #             x, y = math.floor(x), math.floor(y)
+    #             (mouseX, mouseY) = pygame.mouse.get_pos()
+    #             a, b = self.GetClickedSquare(mouseX, mouseY)
+    #             a, b = math.floor(a), math.floor(b)
+    #             main.play(x, y, a, b)
 
 
 if __name__ == "__main__":
@@ -300,4 +302,4 @@ if __name__ == "__main__":
 
     # main.play()
     game.Draw(testBoard)
-    game.TestRoutine()
+    # game.TestRoutine()
