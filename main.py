@@ -12,6 +12,9 @@ piecesDict = {"ROOK": "R", "KNIGHT": "K", "BISHOP": "B", "QUEEN": "Q", "KING": "
 
 counter = 0
 board = []
+attackingPieces1 = ["KI","R","B","Q","K"]
+attackingPieces2 = ["ki","r","b","q","k"]
+
 
 # WHITE PIECES ARE LOWERCASE AND BLACK PIECES ARE UPPERCASE
 def initialise():
@@ -110,8 +113,8 @@ def play():
                     occ = 1
                     counter -= 1
                 else:
-                    validateAndMove(piecePosx, piecePosy, targetPosx, targetPosy, flag)
-                    checkVal = checkKingSafe(board,flag)
+                    validateAndMove(piecePosx, piecePosy, targetPosx, targetPosy, flag, attackingPieces2)
+                    checkVal = checkKingSafe(board,flag, attackingPieces1)
                     if checkVal == 1:
                         board = boardCopy
                         game.PrintMessage("INVALID (CHECKED) - {} TRY AGAIN".format(player))
@@ -132,8 +135,8 @@ def play():
                     occ = 1
                     counter -= 1
                 else:
-                    validateAndMove(piecePosx, piecePosy, targetPosx, targetPosy, flag)
-                    checkVal = checkKingSafe(board, flag)
+                    validateAndMove(piecePosx, piecePosy, targetPosx, targetPosy, flag, attackingPieces1)
+                    checkVal = checkKingSafe(board, flag, attackingPieces2)
                     if checkVal == 1:
                         board = boardCopy
                         game.PrintMessage("INVALID (CHECKED) - {} TRY AGAIN".format(player))
@@ -163,606 +166,529 @@ def play():
         game.Draw(board)
 
 
-def validateAndMove(pieceX, pieceY, targetX, targetY, playerNo):
-    if playerNo == 1:
-        if board[pieceX][pieceY] == 'p':
-            if targetY == pieceY:
-                if board[pieceX + 1][pieceY] == '_':
-                    if pieceX == 1 and targetX == 3:
-                        board[pieceX][pieceY] = '_'
-                        board[targetX][targetY] = 'p'
-                    elif targetX - pieceX == 1:
-                        board[pieceX][pieceY] = '_'
-                        board[targetX][targetY] = 'p'
-                else:
-                    print("INVALID MOVE")
-
-            elif abs(targetY - pieceY) == 1 and (targetX - pieceX) == 1:
-                if board[targetX][targetY].isupper():
-                    board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = 'p'
-
-        elif board[pieceX][pieceY] == 'ki':
-            if targetY == pieceY or targetY == pieceY - 1 or targetY == pieceY + 1:
-                if pieceX - targetX == 1:
-                    board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = 'ki'
-                elif pieceX - targetX == 0:
-                    board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = 'ki'
-                elif pieceX - targetX == -1:
-                    board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = 'ki'
-                else:
-                    print("INVALID MOVE")
-            else:
-                print("INVALID MOVE")
-
-        elif board[pieceX][pieceY] == 'r':
-            if targetX == pieceX:
-                if targetY - pieceY >= 0:
-                    for i in range(abs(targetY - pieceY) - 1):
-                        if board[pieceX][pieceY + i + 1] != '_':
-                            print("INVALID MOVE")
-                            return
-                    board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = 'r'
-                else:
-                    for i in range(abs(targetY - pieceY) - 1):
-                        if board[targetX][targetY + i + 1] != '_':
-                            print("INVALID MOVE")
-                            return
-                    board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = 'r'
-            elif targetY == pieceY:
-                if targetX - pieceX >= 0:
-                    for i in range(abs(targetX - pieceX) - 1):
-                        if board[pieceX + i + 1][pieceY] != '_':
-                            print("INVALID MOVE")
-                            return
-                    board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = 'r'
-                else:
-                    for i in range(abs(targetX - pieceX) - 1):
-                        if board[targetX + i + 1][targetY] != '_':
-                            print("INVALID MOVE")
-                            return
-                    board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = 'r'
-
-        elif board[pieceX][pieceY] == 'b' or board[pieceX][pieceY] == 'q':
-            buffer = board[pieceX][pieceY]
-            if abs(pieceX - targetX) == abs(pieceY - targetY):
-                print(pieceX, targetX)
-                if targetX < pieceX:
-                    if targetY < pieceY:
-                        for x in range(pieceX - targetX - 1):
-                            if board[pieceX - x - 1][pieceY - x - 1] != '_':
-                                print("INVALID MOVE")
-                                return
-                        board[pieceX][pieceY] = '_'
-                        board[targetX][targetY] = buffer
-                    else:
-                        for x in range(pieceX - targetX - 1):
-                            if board[pieceX - x - 1][pieceY + x + 1] != '_':
-                                print("INVALID MOVE")
-                                return
-                        board[pieceX][pieceY] = '_'
-                        board[targetX][targetY] = buffer
-                else:
-                    if targetY < pieceY:
-                        for x in range(targetX - pieceX - 1):
-                            if board[pieceX + x + 1][pieceY - x - 1] != '_':
-                                print("INVALID MOVE")
-                                return
-                        board[pieceX][pieceY] = '_'
-                        board[targetX][targetY] = buffer
-                    else:
-                        for x in range(targetX - pieceX - 1):
-                            if board[pieceX + x + 1][pieceY + x + 1] != '_':
-                                print("INVALID MOVE")
-                                return
-                        board[pieceX][pieceY] = '_'
-                        board[targetX][targetY] = buffer
-            else:
-                if board[pieceX][pieceY] == 'q':
-                    if targetX == pieceX:
-                        if targetY - pieceY >= 0:
-                            for i in range(abs(targetY - pieceY) - 1):
-                                if board[pieceX][pieceY + i + 1] != '_':
-                                    print("INVALID MOVE")
-                                    return
+def validateAndMove(pieceX, pieceY, targetX, targetY, playerNo, attackingPieces):
+    if board[pieceX][pieceY] == 'p' or board[pieceX][pieceY] == 'P':
+        print("000")
+        if playerNo == 1:
+            if board[pieceX][pieceY] == 'p':
+                if targetY == pieceY:
+                    if board[pieceX + 1][pieceY] == '_':
+                        if pieceX == 1 and targetX == 3:
                             board[pieceX][pieceY] = '_'
-                            board[targetX][targetY] = 'q'
-                        else:
-                            for i in range(abs(targetY - pieceY) - 1):
-                                if board[targetX][targetY + i + 1] != '_':
-                                    print("INVALID MOVE")
-                                    return
+                            board[targetX][targetY] = 'p'
+                        elif targetX - pieceX == 1:
                             board[pieceX][pieceY] = '_'
-                            board[targetX][targetY] = 'q'
-                    elif targetY == pieceY:
-                        if targetX - pieceX >= 0:
-                            for i in range(abs(targetX - pieceX) - 1):
-                                if board[pieceX + i + 1][pieceY] != '_':
-                                    print("INVALID MOVE")
-                                    return
-                            board[pieceX][pieceY] = '_'
-                            board[targetX][targetY] = 'q'
-                        else:
-                            for i in range(abs(targetX - pieceX) - 1):
-                                if board[targetX + i + 1][targetY] != '_':
-                                    print("INVALID MOVE")
-                                    return
-                            board[pieceX][pieceY] = '_'
-                            board[targetX][targetY] = 'q'
+                            board[targetX][targetY] = 'p'
                     else:
                         print("INVALID MOVE")
-                else:
-                    print("INVALID MOVE")
 
-        elif board[pieceX][pieceY] == 'k':
-            if (targetY == pieceY - 1 or targetY == pieceY + 1) and (targetX == pieceX - 2 or targetX == pieceX + 2):
-                board[pieceX][pieceY] = '_'
-                board[targetX][targetY] = 'k'
-            elif (targetY == pieceY - 2 or targetY == pieceY + 2) and (targetX == pieceX - 1 or targetX == pieceX + 1):
-                board[pieceX][pieceY] = '_'
-                board[targetX][targetY] = 'k'
-            else:
-                print("INVALID MOVE")
-
-            ##################################### PLAYER 2 #########################################
-
-    else:
-        if board[pieceX][pieceY] == 'P':
-            if targetY == pieceY:
-                if board[pieceX - 1][pieceY] == '_':
-                    if pieceX == 6 and targetX == 4:
+                elif abs(targetY - pieceY) == 1 and (targetX - pieceX) == 1:
+                    if board[targetX][targetY].isupper():
                         board[pieceX][pieceY] = '_'
-                        board[targetX][targetY] = 'P'
-                    elif targetX - pieceX == -1:
-                        board[pieceX][pieceY] = '_'
-                        board[targetX][targetY] = 'P'
-                else:
-                    print("INVALID MOVE")
+                        board[targetX][targetY] = 'p'
 
-            elif abs(targetY - pieceY) == 1 and (targetX - pieceX) == -1:
-                if board[targetX][targetY].islower():
-                    board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = 'P'
-
-        elif board[pieceX][pieceY] == 'KI':
-            if targetY == pieceY or targetY == pieceY - 1 or targetY == pieceY + 1:
-                if pieceX - targetX == 1:
-                    board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = 'KI'
-                elif pieceX - targetX == 0:
-                    board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = 'KI'
-                elif pieceX - targetX == -1:
-                    board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = 'KI'
-                else:
-                    print("INVALID MOVE")
-            else:
-                print("INVALID MOVE")
-
-        elif board[pieceX][pieceY] == 'R':
-            if targetX == pieceX:
-                if targetY - pieceY >= 0:
-                    for i in range(abs(targetY - pieceY) - 1):
-                        if board[pieceX][pieceY + i + 1] != '_':
-                            print("INVALID MOVE")
-                            return
-                    board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = 'R'
-                else:
-                    for i in range(abs(targetY - pieceY) - 1):
-                        if board[targetX][targetY + i + 1] != '_':
-                            print("INVALID MOVE")
-                            return
-                    board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = 'R'
-            elif targetY == pieceY:
-                if targetX - pieceX < 0:
-                    for i in range(abs(targetX - pieceX) - 1):
-                        if board[pieceX - i - 1][pieceY] != '_':
-                            print("INVALID MOVE")
-                            return
-                    board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = 'R'
-                else:
-                    for i in range(abs(targetX - pieceX) - 1):
-                        if board[targetX - i - 1][targetY] != '_':
-                            print("INVALID MOVE")
-                            return
-                    board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = 'R'
-
-        elif board[pieceX][pieceY] == 'B' or board[pieceX][pieceY] == 'Q':
-            buffer = board[pieceX][pieceY]
-            if abs(pieceX - targetX) == abs(pieceY - targetY):
-                if targetX < pieceX:
-                    if targetY < pieceY:
-                        for x in range(pieceX - targetX - 1):
-                            if board[pieceX - x - 1][pieceY - x - 1] != '_':
-                                print("INVALID MOVE")
-                                return
-                        board[pieceX][pieceY] = '_'
-                        board[targetX][targetY] = buffer
-                    else:
-                        for x in range(pieceX - targetX - 1):
-                            if board[pieceX - x - 1][pieceY + x + 1] != '_':
-                                print("INVALID MOVE")
-                                return
-                        board[pieceX][pieceY] = '_'
-                        board[targetX][targetY] = buffer
-                else:
-                    if targetY < pieceY:
-                        for x in range(targetX - pieceX - 1):
-                            if board[pieceX + x + 1][pieceY - x - 1] != '_':
-                                print("INVALID MOVE")
-                                return
-                        board[pieceX][pieceY] = '_'
-                        board[targetX][targetY] = buffer
-                    else:
-                        for x in range(targetX - pieceX - 1):
-                            if board[pieceX + x + 1][pieceY + x + 1] != '_':
-                                print("INVALID MOVE")
-                                return
-                        board[pieceX][pieceY] = '_'
-                        board[targetX][targetY] = buffer
-            else:
-                if board[pieceX][pieceY] == 'Q':
-                    if targetX == pieceX:
-                        if targetY - pieceY >= 0:
-                            for i in range(abs(targetY - pieceY) - 1):
-                                if board[pieceX][pieceY + i + 1] != '_':
-                                    print("INVALID MOVE")
-                                    return
+        if playerNo == 2:
+            if board[pieceX][pieceY] == 'P':
+                if targetY == pieceY:
+                    if board[pieceX - 1][pieceY] == '_':
+                        if pieceX == 6 and targetX == 4:
                             board[pieceX][pieceY] = '_'
-                            board[targetX][targetY] = 'Q'
-                        else:
-                            for i in range(abs(targetY - pieceY) - 1):
-                                if board[targetX][targetY + i + 1] != '_':
-                                    print("INVALID MOVE")
-                                    return
+                            board[targetX][targetY] = 'P'
+                        elif targetX - pieceX == -1:
                             board[pieceX][pieceY] = '_'
-                            board[targetX][targetY] = 'Q'
-                    elif targetY == pieceY:
-                        if targetX - pieceX < 0:
-                            for i in range(abs(targetX - pieceX) - 1):
-                                if board[pieceX - i - 1][pieceY] != '_':
-                                    print("INVALID MOVE")
-                                    return
-                            board[pieceX][pieceY] = '_'
-                            board[targetX][targetY] = 'Q'
-                        else:
-                            for i in range(abs(targetX - pieceX) - 1):
-                                if board[targetX - i - 1][targetY] != '_':
-                                    print("INVALID MOVE")
-                                    return
-                            board[pieceX][pieceY] = '_'
-                            board[targetX][targetY] = 'Q'
+                            board[targetX][targetY] = 'P'
                     else:
                         print("INVALID MOVE")
-                else:
-                    print("INVALID MOVE")
 
-        elif board[pieceX][pieceY] == 'K':
-            if (targetY == pieceY - 1 or targetY == pieceY + 1) and (targetX == pieceX - 2 or targetX == pieceX + 2):
+                elif abs(targetY - pieceY) == 1 and (targetX - pieceX) == -1:
+                    if board[targetX][targetY].islower():
+                        board[pieceX][pieceY] = '_'
+                        board[targetX][targetY] = 'P'
+
+    elif board[pieceX][pieceY] == attackingPieces[0]:
+        print("101")
+        if targetY == pieceY or targetY == pieceY - 1 or targetY == pieceY + 1:
+            if pieceX - targetX == 1:
                 board[pieceX][pieceY] = '_'
-                board[targetX][targetY] = 'K'
-            elif (targetY == pieceY - 2 or targetY == pieceY + 2) and (targetX == pieceX - 1 or targetX == pieceX + 1):
+                board[targetX][targetY] = attackingPieces[0]
+            elif pieceX - targetX == 0:
                 board[pieceX][pieceY] = '_'
-                board[targetX][targetY] = 'K'
+                board[targetX][targetY] = attackingPieces[0]
+            elif pieceX - targetX == -1:
+                board[pieceX][pieceY] = '_'
+                board[targetX][targetY] = attackingPieces[0]
             else:
                 print("INVALID MOVE")
-                # game.Draw(board)
+        else:
+            print("INVALID MOVE")
+
+    elif board[pieceX][pieceY] == attackingPieces[1]:
+        print("202")
+        if targetX == pieceX:
+            if targetY - pieceY >= 0:
+                for i in range(abs(targetY - pieceY) - 1):
+                    if board[pieceX][pieceY + i + 1] != '_':
+                        print("INVALID MOVE")
+                        return
+                board[pieceX][pieceY] = '_'
+                board[targetX][targetY] = attackingPieces[1]
+            else:
+                for i in range(abs(targetY - pieceY) - 1):
+                    if board[targetX][targetY + i + 1] != '_':
+                        print("INVALID MOVE")
+                        return
+                board[pieceX][pieceY] = '_'
+                board[targetX][targetY] = attackingPieces[1]
+        elif targetY == pieceY:
+            if targetX - pieceX >= 0:
+                for i in range(abs(targetX - pieceX) - 1):
+                    if board[pieceX + i + 1][pieceY] != '_':
+                        print("INVALID MOVE")
+                        return
+                board[pieceX][pieceY] = '_'
+                board[targetX][targetY] = attackingPieces[1]
+            else:
+                for i in range(abs(targetX - pieceX) - 1):
+                    if board[targetX + i + 1][targetY] != '_':
+                        print("INVALID MOVE")
+                        return
+                board[pieceX][pieceY] = '_'
+                board[targetX][targetY] = attackingPieces[1]
+
+    elif board[pieceX][pieceY] == attackingPieces[2] or board[pieceX][pieceY] == attackingPieces[3]:
+        print("303")
+        buffer = board[pieceX][pieceY]
+        if abs(pieceX - targetX) == abs(pieceY - targetY):
+            print(pieceX, targetX)
+            if targetX < pieceX:
+                if targetY < pieceY:
+                    for x in range(pieceX - targetX - 1):
+                        if board[pieceX - x - 1][pieceY - x - 1] != '_':
+                            print("INVALID MOVE")
+                            return
+                    board[pieceX][pieceY] = '_'
+                    board[targetX][targetY] = buffer
+                else:
+                    for x in range(pieceX - targetX - 1):
+                        if board[pieceX - x - 1][pieceY + x + 1] != '_':
+                            print("INVALID MOVE")
+                            return
+                    board[pieceX][pieceY] = '_'
+                    board[targetX][targetY] = buffer
+            else:
+                if targetY < pieceY:
+                    for x in range(targetX - pieceX - 1):
+                        if board[pieceX + x + 1][pieceY - x - 1] != '_':
+                            print("INVALID MOVE")
+                            return
+                    board[pieceX][pieceY] = '_'
+                    board[targetX][targetY] = buffer
+                else:
+                    for x in range(targetX - pieceX - 1):
+                        if board[pieceX + x + 1][pieceY + x + 1] != '_':
+                            print("INVALID MOVE")
+                            return
+                    board[pieceX][pieceY] = '_'
+                    board[targetX][targetY] = buffer
+        else:
+            if board[pieceX][pieceY] == attackingPieces[3]:
+                if targetX == pieceX:
+                    if targetY - pieceY >= 0:
+                        for i in range(abs(targetY - pieceY) - 1):
+                            if board[pieceX][pieceY + i + 1] != '_':
+                                print("INVALID MOVE")
+                                return
+                        board[pieceX][pieceY] = '_'
+                        board[targetX][targetY] = attackingPieces[3]
+                    else:
+                        for i in range(abs(targetY - pieceY) - 1):
+                            if board[targetX][targetY + i + 1] != '_':
+                                print("INVALID MOVE")
+                                return
+                        board[pieceX][pieceY] = '_'
+                        board[targetX][targetY] = attackingPieces[3]
+                elif targetY == pieceY:
+                    if targetX - pieceX >= 0:
+                        for i in range(abs(targetX - pieceX) - 1):
+                            if board[pieceX + i + 1][pieceY] != '_':
+                                print("INVALID MOVE")
+                                return
+                        board[pieceX][pieceY] = '_'
+                        board[targetX][targetY] = attackingPieces[3]
+                    else:
+                        for i in range(abs(targetX - pieceX) - 1):
+                            if board[targetX + i + 1][targetY] != '_':
+                                print("INVALID MOVE")
+                                return
+                        board[pieceX][pieceY] = '_'
+                        board[targetX][targetY] = attackingPieces[3]
+                else:
+                    print("INVALID MOVE")
+            else:
+                print("INVALID MOVE")
+
+    elif board[pieceX][pieceY] == attackingPieces[4]:
+        print("404")
+        if (targetY == pieceY - 1 or targetY == pieceY + 1) and (targetX == pieceX - 2 or targetX == pieceX + 2):
+            board[pieceX][pieceY] = '_'
+            board[targetX][targetY] = attackingPieces[4]
+        elif (targetY == pieceY - 2 or targetY == pieceY + 2) and (targetX == pieceX - 1 or targetX == pieceX + 1):
+            board[pieceX][pieceY] = '_'
+            board[targetX][targetY] = attackingPieces[4]
+        else:
+            print("INVALID MOVE")
+
 
 
 #############################################################################################################################################
 # Function checks if the king is under attack - returns 1 if True else 0
-def checkKingSafe(board1, playerNo):
+def checkKingSafe(board1, playerNo, attackingPieces):
     KINGX, KINGY = -1,-1
-    if playerNo == 1:
-        for i in range(8):
-            if 'ki' in board1[i]:
-                KINGX, KINGY = i, board1[i].index('ki')
-
-        if KINGX + 1 < 8:
-            if KINGY - 1 >= 0:
-                if board1[KINGX+1][KINGY-1] == 'P':
-                    print('here1')
-                    return 1
-            if KINGY + 1 < 8:
-                if board1[KINGX+1][KINGY+1] == 'P':
-                    print('here2')
-                    return 1
-
-
-        leftY = KINGY-1
-        if leftY >=0:
-            while leftY>0 and board1[KINGX][leftY] == '_':
-                leftY -= 1
-            if board1[KINGX][leftY] == 'R' or board1[KINGX][leftY] == 'Q':
-                print('here3')
-                return 1
-
-        rightY = KINGY+1
-        if rightY<8:
-            while rightY<7 and board1[KINGX][rightY] == '_':
-                rightY += 1
-            if board1[KINGX][rightY] == 'R' or board1[KINGX][leftY] == 'Q':
-                print('here4')
-                return 1
-
-        top = KINGX-1
-        if top>=0:
-            while top>0 and board1[top][KINGY] == '_':
-                top -= 1
-            if board1[top][KINGY] == 'R' or board1[top][KINGY] == 'Q':
-                print('here5')
-                return 1
-
-        bottom = KINGX+1
-        if bottom <8:
-            while bottom<7 and board1[bottom][KINGY] == '_':
-                bottom += 1
-            if board1[bottom][KINGY] == 'R' or board1[bottom][KINGY] == 'Q':
-                print('here6')
-                return 1
-
-        # DIAGONAL CHECKS FOR OPPONENTS ATTACKING QUEEN OR BISHOP
-        topDiagonalX, topRightDiagonalY = KINGX-1, KINGY+1
-        if topDiagonalX>=0 and topRightDiagonalY<8:
-            while topDiagonalX>0 and topRightDiagonalY<7 and board1[topDiagonalX][topRightDiagonalY] == '_':
-                topDiagonalX -= 1
-                topRightDiagonalY += 1
-            print(topDiagonalX, topRightDiagonalY)
-            if board1[topDiagonalX][topRightDiagonalY] == 'B' or board1[topDiagonalX][topRightDiagonalY] == 'Q':
-                print('here7')
-                return 1
-
-        topDiagonalX, topLeftDiagonalY = KINGX-1, KINGY-1
-        if topDiagonalX>=0 and topLeftDiagonalY>=0:
-            while topDiagonalX>0 and topLeftDiagonalY>0 and board1[topDiagonalX][topLeftDiagonalY] == '_':
-                topDiagonalX -= 1
-                topLeftDiagonalY -= 1
-            if board1[topDiagonalX][topLeftDiagonalY] == 'B' or board1[topDiagonalX][topLeftDiagonalY] == 'Q':
-                print('here8')
-                return 1
-
-        bottomDiagonalX, bottomRightDiagonalY = KINGX+1, KINGY+1
-        if bottomDiagonalX <8 and bottomRightDiagonalY<8:
-            while bottomDiagonalX<7 and bottomRightDiagonalY<7 and board1[bottomDiagonalX][bottomRightDiagonalY] == '_':
-                bottomDiagonalX += 1
-                bottomRightDiagonalY += 1
-            if board1[bottomDiagonalX][bottomRightDiagonalY] == 'B' or board1[bottomDiagonalX][bottomRightDiagonalY] == 'Q':
-                print('here9')
-                return 1
-
-        bottomDiagonalX, bottomLeftDiagonalY = KINGX+1, KINGY-1
-        if bottomDiagonalX<8 and bottomLeftDiagonalY>=0:
-            while bottomDiagonalX<7 and bottomLeftDiagonalY>0 and board1[bottomDiagonalX][bottomLeftDiagonalY] == '_':
-                bottomDiagonalX += 1
-                bottomLeftDiagonalY -= 1
-            if board1[bottomDiagonalX][bottomLeftDiagonalY] == 'B' or board1[bottomDiagonalX][bottomLeftDiagonalY] == 'Q':
-                print('here10')
-                return 1
-
-        if KINGY-1>=0:
-            if board1[KINGX][KINGY-1] == 'KI':
-                print('here11')
-                return 1
-
-        if KINGY+1<8:
-            if board1[KINGX][KINGY+1] == 'KI':
-                print('here12')
-                return 1
-
-        if KINGX-1>=0:
-            if KINGY-1>=0:
-                if board1[KINGX-1][KINGY-1] == 'KI':
-                    print('here13')
-                    return 1
-            if KINGY+1<8:
-                if board1[KINGX-1][KINGY+1] == 'KI':
-                    print('here14')
-                    return 1
-            if board1[KINGX-1][KINGY] == 'KI':
-                print('here15')
-                return 1
-
-        if KINGX+1<8:
-            if board1[KINGX+1][KINGY] == 'KI':
-                print('here16')
-                return 1
-            if KINGY-1>=0:
-                if board1[KINGX+1][KINGY-1] == 'KI':
-                    print('here17')
-                    return 1
-            if KINGY+1<8:
-                if board1[KINGX+1][KINGY+1] == 'KI':
-                    print('here18')
-                    return 1
-
-        if KINGY-1>=0:
-            if KINGX-2>=0:
-                if board1[KINGX-2][KINGY-1] == 'K':
-                    print('here19')
-                    return 1
-            if KINGX+2<8:
-                if board1[KINGX+2][KINGY-1] == 'K':
-                    print('here20')
-                    return 1
-        if KINGY-2>=0:
-            if KINGX-1>=0:
-                if board1[KINGX-1][KINGY-2] == 'K':
-                    print('here21')
-                    return 1
-            if KINGX+1<8:
-                if board1[KINGX+1][KINGY-2] == 'K':
-                    print('here22')
-                    return 1
-
-        if KINGY+1<8:
-            if KINGX-2>=0:
-                if board1[KINGX-2][KINGY+1] == 'K':
-                    print('here23')
-                    return 1
-            if KINGX+2<8:
-                if board1[KINGX+2][KINGY+1] == 'K':
-                    print('here24')
-                    return 1
-
-        if KINGY+2<8:
-            if KINGX-1>=0:
-                if board1[KINGX-1][KINGY+2] == 'K':
-                    print('here25')
-                    return 1
-            if KINGX+1<8:
-                if board1[KINGX+1][KINGY+2] == 'K':
-                    print('here26')
-                    return 1
-
-        return 0
-    # PLAYER 2
+    init = 0
+    if attackingPieces[0].islower():
+        tempKing = attackingPieces[0].upper()
     else:
-        for i in range(8):
-            if 'KI' in board1[i]:
-                KINGX, KINGY = i, board1[i].index('KI')
+        tempKing = attackingPieces[0].lower()
 
-        if KINGX - 1 >= 0:
-            if KINGY-1>=0:
-                if board1[KINGX-1][KINGY-1] == 'p':
-                    return 1
-            if KINGY+1<8:
-                if board1[KINGX-1][KINGY+1] == 'p':
-                    return 1
-
-        leftY = KINGY - 1
-        if leftY>=0:
-            while leftY > 0 and board1[KINGX][leftY] == '_':
-                leftY -= 1
-            if board1[KINGX][leftY] == 'r' or board1[KINGX][leftY] == 'q':
-                return 1
-
-        rightY = KINGY + 1
-        if rightY<8:
-            while rightY < 7 and board1[KINGX][rightY] == '_':
-                rightY += 1
-            if board1[KINGX][rightY] == 'r' or board1[KINGX][leftY] == 'q':
-                return 1
-
-        top = KINGX - 1
-        if top>=0:
-            while top > 0 and board1[top][KINGY] == '_':
-                top -= 1
-            if board1[top][KINGY] == 'r' or board1[top][KINGY] == 'q':
-                return 1
-
-        bottom = KINGX + 1
-        if bottom <8:
-            while bottom < 7 and board1[bottom][KINGY] == '_':
-                bottom += 1
-            if board1[bottom][KINGY] == 'r' or board1[bottom][KINGY] == 'q':
-                return 1
-
-        # DIAGONAL CHECKS FOR OPPONENTS ATTACKING QUEEN OR BISHOP
-        topDiagonalX, topRightDiagonalY = KINGX - 1, KINGY + 1
-        if topDiagonalX>0 and topRightDiagonalY<8:
-            while topDiagonalX > 0 and topRightDiagonalY < 7 and board1[topDiagonalX][topRightDiagonalY] == '_':
-                topDiagonalX -= 1
-                topRightDiagonalY += 1
-            print(topDiagonalX, topRightDiagonalY)
-            if board1[topDiagonalX][topRightDiagonalY-1] == 'b' or board1[topDiagonalX][topRightDiagonalY-1] == 'q':
-                return 1
-
-        topDiagonalX, topLeftDiagonalY = KINGX - 1, KINGY - 1
-        if topDiagonalX>=0 and topLeftDiagonalY>=0:
-            while topDiagonalX > 0 and topLeftDiagonalY > 0 and board1[topDiagonalX][topLeftDiagonalY] == '_':
-                topDiagonalX -= 1
-                topLeftDiagonalY -= 1
-            if board1[topDiagonalX][topLeftDiagonalY] == 'b' or board1[topDiagonalX][topLeftDiagonalY] == 'q':
-                return 1
-
-        bottomDiagonalX, bottomRightDiagonalY = KINGX + 1, KINGY + 1
-        if bottomDiagonalX<8 and bottomRightDiagonalY<8:
-            while bottomDiagonalX < 7 and bottomRightDiagonalY < 7 and board1[bottomDiagonalX][bottomRightDiagonalY] == '_':
-                bottomDiagonalX += 1
-                bottomRightDiagonalY += 1
-            if board1[bottomDiagonalX][bottomRightDiagonalY] == 'b' or board1[bottomDiagonalX][bottomRightDiagonalY] == 'q':
-                return 1
-
-        bottomDiagonalX, bottomLeftDiagonalY = KINGX + 1, KINGY - 1
-        if bottomDiagonalX<8 and bottomLeftDiagonalY>=0:
-            while bottomDiagonalX < 7 and bottomLeftDiagonalY > 0 and board1[bottomDiagonalX][bottomLeftDiagonalY] == '_':
-                bottomDiagonalX += 1
-                bottomLeftDiagonalY -= 1
-            if board1[bottomDiagonalX][bottomLeftDiagonalY] == 'b' or board1[bottomDiagonalX][bottomLeftDiagonalY] == 'q':
-                return 1
-
-        if KINGY - 1 >= 0:
-            if board1[KINGX][KINGY - 1] == 'ki':
-                return 1
-
-        if KINGY + 1 < 8:
-            if board1[KINGX][KINGY + 1] == 'ki':
-                return 1
-
-        if KINGX - 1 >= 0:
-            if KINGY - 1 >= 0:
-                if board1[KINGX - 1][KINGY - 1] == 'ki':
-                    return 1
-            if KINGY + 1 < 8:
-                if board1[KINGX - 1][KINGY + 1] == 'ki':
-                    return 1
-            if board1[KINGX - 1][KINGY] == 'ki':
-                return 1
-
-        if KINGX + 1 < 8:
-            if board1[KINGX + 1][KINGY] == 'ki':
-                return 1
-            if KINGY - 1 >= 0:
-                if board1[KINGX + 1][KINGY - 1] == 'ki':
-                    return 1
-            if KINGY + 1 < 8:
-                if board1[KINGX + 1][KINGY + 1] == 'ki':
-                    return 1
-
-        if KINGY - 1 >= 0:
-            if KINGX - 2 >= 0:
-                if board1[KINGX - 2][KINGY - 1] == 'k':
-                    return 1
-            if KINGX + 2 < 8:
-                if board1[KINGX + 2][KINGY - 1] == 'k':
-                    return 1
-        if KINGY - 2 >= 0:
-            if KINGX - 1 >= 0:
-                if board1[KINGX - 1][KINGY - 2] == 'k':
-                    return 1
+    for i in range(8):
+        if tempKing in board1[i]:
+            KINGX, KINGY = i, board1[i].index(tempKing)
+    print(KINGX,KINGY)
+    if init == 0:
+        if playerNo == 1:
             if KINGX + 1 < 8:
-                if board1[KINGX + 1][KINGY - 2] == 'k':
-                    return 1
-
-        if KINGY + 1 < 8:
-            if KINGX - 2 >= 0:
-                if board1[KINGX - 2][KINGY + 1] == 'k':
-                    return 1
-            if KINGX + 2 < 8:
-                if board1[KINGX + 2][KINGY + 1] == 'k':
-                    return 1
-
-        if KINGY + 2 < 8:
+                if KINGY - 1 >= 0:
+                    if board1[KINGX+1][KINGY-1] == 'P':
+                        print('here1')
+                        return 1
+                if KINGY + 1 < 8:
+                    if board1[KINGX+1][KINGY+1] == 'P':
+                        print('here2')
+                        return 1
+        else:
             if KINGX - 1 >= 0:
-                if board1[KINGX - 1][KINGY + 2] == 'k':
-                    return 1
-            if KINGX + 1 < 8:
-                if board1[KINGX + 1][KINGY + 2] == 'k':
-                    return 1
+                if KINGY - 1 >= 0:
+                    if board1[KINGX - 1][KINGY - 1] == 'p':
+                        return 1
+                if KINGY + 1 < 8:
+                    if board1[KINGX - 1][KINGY + 1] == 'p':
+                        return 1
 
-        return 0
+    leftY = KINGY-1
+    if leftY >=0:
+        while leftY>0 and board1[KINGX][leftY] == '_':
+            leftY -= 1
+        print(leftY)
+        if board1[KINGX][leftY] == attackingPieces[1] or board1[KINGX][leftY] == attackingPieces[3]:
+            print('here3')
+            return 1
+
+    rightY = KINGY+1
+    if rightY<8:
+        while rightY<7 and board1[KINGX][rightY] == '_':
+            rightY += 1
+        if board1[KINGX][rightY] == attackingPieces[1] or board1[KINGX][leftY] == attackingPieces[3]:
+            print('here4')
+            return 1
+
+    top = KINGX-1
+    if top>=0:
+        while top>0 and board1[top][KINGY] == '_':
+            top -= 1
+        if board1[top][KINGY] == attackingPieces[1] or board1[top][KINGY] == attackingPieces[3]:
+            print('here5')
+            return 1
+
+    bottom = KINGX+1
+    if bottom <8:
+        while bottom<7 and board1[bottom][KINGY] == '_':
+            bottom += 1
+        if board1[bottom][KINGY] == attackingPieces[1] or board1[bottom][KINGY] == attackingPieces[3]:
+            print('here6')
+            return 1
+
+    # DIAGONAL CHECKS FOR OPPONENTS ATTACKING QUEEN OR BISHOP
+    topDiagonalX, topRightDiagonalY = KINGX-1, KINGY+1
+    if topDiagonalX>=0 and topRightDiagonalY<8:
+        while topDiagonalX>0 and topRightDiagonalY<7 and board1[topDiagonalX][topRightDiagonalY] == '_':
+            topDiagonalX -= 1
+            topRightDiagonalY += 1
+        print(topDiagonalX, topRightDiagonalY)
+        if board1[topDiagonalX][topRightDiagonalY] == attackingPieces[2] or board1[topDiagonalX][topRightDiagonalY] == attackingPieces[3]:
+            print('here7')
+            return 1
+
+    topDiagonalX, topLeftDiagonalY = KINGX-1, KINGY-1
+    if topDiagonalX>=0 and topLeftDiagonalY>=0:
+        while topDiagonalX>0 and topLeftDiagonalY>0 and board1[topDiagonalX][topLeftDiagonalY] == '_':
+            topDiagonalX -= 1
+            topLeftDiagonalY -= 1
+        if board1[topDiagonalX][topLeftDiagonalY] == attackingPieces[2] or board1[topDiagonalX][topLeftDiagonalY] == attackingPieces[3]:
+            print('here8')
+            return 1
+
+    bottomDiagonalX, bottomRightDiagonalY = KINGX+1, KINGY+1
+    if bottomDiagonalX <8 and bottomRightDiagonalY<8:
+        while bottomDiagonalX<7 and bottomRightDiagonalY<7 and board1[bottomDiagonalX][bottomRightDiagonalY] == '_':
+            bottomDiagonalX += 1
+            bottomRightDiagonalY += 1
+        if board1[bottomDiagonalX][bottomRightDiagonalY] == attackingPieces[2] or board1[bottomDiagonalX][bottomRightDiagonalY] == attackingPieces[3]:
+            print('here9')
+            return 1
+
+    bottomDiagonalX, bottomLeftDiagonalY = KINGX+1, KINGY-1
+    if bottomDiagonalX<8 and bottomLeftDiagonalY>=0:
+        while bottomDiagonalX<7 and bottomLeftDiagonalY>0 and board1[bottomDiagonalX][bottomLeftDiagonalY] == '_':
+            bottomDiagonalX += 1
+            bottomLeftDiagonalY -= 1
+        if board1[bottomDiagonalX][bottomLeftDiagonalY] == attackingPieces[2] or board1[bottomDiagonalX][bottomLeftDiagonalY] == attackingPieces[3]:
+            print('here10')
+            return 1
+
+    if KINGY-1>=0:
+        if board1[KINGX][KINGY-1] == attackingPieces[0]:
+            print('here11')
+            return 1
+
+    if KINGY+1<8:
+        if board1[KINGX][KINGY+1] == attackingPieces[0]:
+            print('here12')
+            return 1
+
+    if KINGX-1>=0:
+        if KINGY-1>=0:
+            if board1[KINGX-1][KINGY-1] == attackingPieces[0]:
+                print('here13')
+                return 1
+        if KINGY+1<8:
+            if board1[KINGX-1][KINGY+1] == attackingPieces[0]:
+                print('here14')
+                return 1
+        if board1[KINGX-1][KINGY] == attackingPieces[0]:
+            print('here15')
+            return 1
+
+    if KINGX+1<8:
+        if board1[KINGX+1][KINGY] == attackingPieces[0]:
+            print('here16')
+            return 1
+        if KINGY-1>=0:
+            if board1[KINGX+1][KINGY-1] == attackingPieces[0]:
+                print('here17')
+                return 1
+        if KINGY+1<8:
+            if board1[KINGX+1][KINGY+1] == attackingPieces[0]:
+                print('here18')
+                return 1
+
+    if KINGY-1>=0:
+        if KINGX-2>=0:
+            if board1[KINGX-2][KINGY-1] == attackingPieces[4]:
+                print('here19')
+                return 1
+        if KINGX+2<8:
+            if board1[KINGX+2][KINGY-1] == attackingPieces[4]:
+                print('here20')
+                return 1
+    if KINGY-2>=0:
+        if KINGX-1>=0:
+            if board1[KINGX-1][KINGY-2] == attackingPieces[4]:
+                print('here21')
+                return 1
+        if KINGX+1<8:
+            if board1[KINGX+1][KINGY-2] == attackingPieces[4]:
+                print('here22')
+                return 1
+
+    if KINGY+1<8:
+        if KINGX-2>=0:
+            if board1[KINGX-2][KINGY+1] == attackingPieces[4]:
+                print('here23')
+                return 1
+        if KINGX+2<8:
+            if board1[KINGX+2][KINGY+1] == attackingPieces[4]:
+                print('here24')
+                return 1
+
+    if KINGY+2<8:
+        if KINGX-1>=0:
+            if board1[KINGX-1][KINGY+2] == attackingPieces[4]:
+                print('here25')
+                return 1
+        if KINGX+1<8:
+            if board1[KINGX+1][KINGY+2] == attackingPieces[4]:
+                print('here26')
+                return 1
+
+    return 0
+
+
+# def moveToProtect(board1,pieceX,pieceY,targetX,targetY,playerNo,attackingPieces):
+#     if playerNo == 1:
+#         if board[pieceX][pieceY] == 'p':
+#             if targetY == pieceY:
+#                 if board[pieceX + 1][pieceY] == '_':
+#                     if pieceX == 1 and targetX == 3:
+#                         board[pieceX][pieceY] = '_'
+#                         board[targetX][targetY] = 'p'
+#                     elif targetX - pieceX == 1:
+#                         board[pieceX][pieceY] = '_'
+#                         board[targetX][targetY] = 'p'
+#                 else:
+#                     print("INVALID MOVE")
+#
+#             elif abs(targetY - pieceY) == 1 and (targetX - pieceX) == 1:
+#                 if board[targetX][targetY].isupper():
+#                     board[pieceX][pieceY] = '_'
+#                     board[targetX][targetY] = 'p'
+#
+#     if playerNo == 2:
+#         if board[pieceX][pieceY] == 'P':
+#             if targetY == pieceY:
+#                 if board[pieceX - 1][pieceY] == '_':
+#                     if pieceX == 6 and targetX == 4:
+#                         board[pieceX][pieceY] = '_'
+#                         board[targetX][targetY] = 'P'
+#                     elif targetX - pieceX == -1:
+#                         board[pieceX][pieceY] = '_'
+#                         board[targetX][targetY] = 'P'
+#                 else:
+#                     print("INVALID MOVE")
+#
+#             elif abs(targetY - pieceY) == 1 and (targetX - pieceX) == -1:
+#                 if board[targetX][targetY].islower():
+#                     board[pieceX][pieceY] = '_'
+#                     board[targetX][targetY] = 'P'
+#
+#
+#     if board[pieceX][pieceY] == attackingPieces[0]:
+#         if targetY == pieceY or targetY == pieceY - 1 or targetY == pieceY + 1:
+#             if pieceX - targetX == 1:
+#                 board[pieceX][pieceY] = '_'
+#                 board[targetX][targetY] = attackingPieces[0]
+#             elif pieceX - targetX == 0:
+#                 board[pieceX][pieceY] = '_'
+#                 board[targetX][targetY] = attackingPieces[0]
+#             elif pieceX - targetX == -1:
+#                 board[pieceX][pieceY] = '_'
+#                 board[targetX][targetY] = attackingPieces[0]
+#             else:
+#                 print("INVALID MOVE")
+#         else:
+#             print("INVALID MOVE")
+#
+#     elif board[pieceX][pieceY] == attackingPieces[1]:
+#         if targetX == pieceX:
+#             if targetY - pieceY >= 0:
+#                 for i in range(abs(targetY - pieceY) - 1):
+#                     if board[pieceX][pieceY + i + 1] != '_':
+#                         print("INVALID MOVE")
+#                         return
+#                 board[pieceX][pieceY] = '_'
+#                 board[targetX][targetY] = attackingPieces[1]
+#             else:
+#                 for i in range(abs(targetY - pieceY) - 1):
+#                     if board[targetX][targetY + i + 1] != '_':
+#                         print("INVALID MOVE")
+#                         return
+#                 board[pieceX][pieceY] = '_'
+#                 board[targetX][targetY] = attackingPieces[1]
+#         elif targetY == pieceY:
+#             if targetX - pieceX >= 0:
+#                 for i in range(abs(targetX - pieceX) - 1):
+#                     if board[pieceX + i + 1][pieceY] != '_':
+#                         print("INVALID MOVE")
+#                         return
+#                 board[pieceX][pieceY] = '_'
+#                 board[targetX][targetY] = attackingPieces[1]
+#             else:
+#                 for i in range(abs(targetX - pieceX) - 1):
+#                     if board[targetX + i + 1][targetY] != '_':
+#                         print("INVALID MOVE")
+#                         return
+#                 board[pieceX][pieceY] = '_'
+#                 board[targetX][targetY] = attackingPieces[1]
+#
+#     elif board[pieceX][pieceY] == attackingPieces[2] or board[pieceX][pieceY] == attackingPieces[3]:
+#         buffer = board[pieceX][pieceY]
+#         if abs(pieceX - targetX) == abs(pieceY - targetY):
+#             print(pieceX, targetX)
+#             if targetX < pieceX:
+#                 if targetY < pieceY:
+#                     for x in range(pieceX - targetX - 1):
+#                         if board[pieceX - x - 1][pieceY - x - 1] != '_':
+#                             print("INVALID MOVE")
+#                             return
+#                     board[pieceX][pieceY] = '_'
+#                     board[targetX][targetY] = buffer
+#                 else:
+#                     for x in range(pieceX - targetX - 1):
+#                         if board[pieceX - x - 1][pieceY + x + 1] != '_':
+#                             print("INVALID MOVE")
+#                             return
+#                     board[pieceX][pieceY] = '_'
+#                     board[targetX][targetY] = buffer
+#             else:
+#                 if targetY < pieceY:
+#                     for x in range(targetX - pieceX - 1):
+#                         if board[pieceX + x + 1][pieceY - x - 1] != '_':
+#                             print("INVALID MOVE")
+#                             return
+#                     board[pieceX][pieceY] = '_'
+#                     board[targetX][targetY] = buffer
+#                 else:
+#                     for x in range(targetX - pieceX - 1):
+#                         if board[pieceX + x + 1][pieceY + x + 1] != '_':
+#                             print("INVALID MOVE")
+#                             return
+#                     board[pieceX][pieceY] = '_'
+#                     board[targetX][targetY] = buffer
+#         else:
+#             if board[pieceX][pieceY] == attackingPieces[3]:
+#                 if targetX == pieceX:
+#                     if targetY - pieceY >= 0:
+#                         for i in range(abs(targetY - pieceY) - 1):
+#                             if board[pieceX][pieceY + i + 1] != '_':
+#                                 print("INVALID MOVE")
+#                                 return
+#                         board[pieceX][pieceY] = '_'
+#                         board[targetX][targetY] = attackingPieces[3]
+#                     else:
+#                         for i in range(abs(targetY - pieceY) - 1):
+#                             if board[targetX][targetY + i + 1] != '_':
+#                                 print("INVALID MOVE")
+#                                 return
+#                         board[pieceX][pieceY] = '_'
+#                         board[targetX][targetY] = attackingPieces[3]
+#                 elif targetY == pieceY:
+#                     if targetX - pieceX >= 0:
+#                         for i in range(abs(targetX - pieceX) - 1):
+#                             if board[pieceX + i + 1][pieceY] != '_':
+#                                 print("INVALID MOVE")
+#                                 return
+#                         board[pieceX][pieceY] = '_'
+#                         board[targetX][targetY] = attackingPieces[3]
+#                     else:
+#                         for i in range(abs(targetX - pieceX) - 1):
+#                             if board[targetX + i + 1][targetY] != '_':
+#                                 print("INVALID MOVE")
+#                                 return
+#                         board[pieceX][pieceY] = '_'
+#                         board[targetX][targetY] = attackingPieces[3]
+#                 else:
+#                     print("INVALID MOVE")
+#             else:
+#                 print("INVALID MOVE")
+#
+#     elif board[pieceX][pieceY] == attackingPieces[4]:
+#         if (targetY == pieceY - 1 or targetY == pieceY + 1) and (targetX == pieceX - 2 or targetX == pieceX + 2):
+#             board[pieceX][pieceY] = '_'
+#             board[targetX][targetY] = attackingPieces[4]
+#         elif (targetY == pieceY - 2 or targetY == pieceY + 2) and (targetX == pieceX - 1 or targetX == pieceX + 1):
+#             board[pieceX][pieceY] = '_'
+#             board[targetX][targetY] = attackingPieces[4]
+#         else:
+#             print("INVALID MOVE")
 
 
 #############################################################################################################################################

@@ -177,81 +177,6 @@ class ChessGUI_pygame:
 
         pygame.display.flip()
 
-    # def EndGame(self, board):
-    #     self.PrintMessage("Press any key to exit.")
-    #     self.Draw(board)  # draw board to show end game status
-    #     pygame.event.set_blocked(MOUSEMOTION)
-    #     while 1:
-    #         e = pygame.event.wait()
-    #         if e.type is KEYDOWN:
-    #             pygame.quit()
-    #             sys.exit(0)
-    #         if e.type is QUIT:
-    #             pygame.quit()
-    #             sys.exit(0)
-
-    # def GetPlayerInput(self, board, currentColor):
-    #     # returns ((from_row,from_col),(to_row,to_col))
-    #     fromSquareChosen = 0
-    #     toSquareChosen = 0
-    #     while not fromSquareChosen or not toSquareChosen:
-    #         squareClicked = []
-    #         pygame.event.set_blocked(MOUSEMOTION)
-    #         e = pygame.event.wait()
-    #         if e.type is KEYDOWN:
-    #             if e.key is K_ESCAPE:
-    #                 fromSquareChosen = 0
-    #                 fromTuple = []
-    #         if e.type is MOUSEBUTTONDOWN:
-    #             (mouseX, mouseY) = pygame.mouse.get_pos()
-    #             squareClicked = self.ConvertToChessCoords((mouseX, mouseY))
-    #             if squareClicked[0] < 0 or squareClicked[0] > 7 or squareClicked[1] < 0 or squareClicked[1] > 7:
-    #                 squareClicked = []  # not a valid chess square
-    #         if e.type is QUIT:  # the "x" kill button
-    #             pygame.quit()
-    #             sys.exit(0)
-    #
-    #         if not fromSquareChosen and not toSquareChosen:
-    #             self.Draw(board)
-    #             if squareClicked != []:
-    #                 (r, c) = squareClicked
-    #                 if currentColor == 'black' and 'b' in board[r][c]:
-    #                     if len(self.Rules.GetListOfValidMoves(board, currentColor, squareClicked)) > 0:
-    #                         fromSquareChosen = 1
-    #                         fromTuple = squareClicked
-    #                 elif currentColor == 'white' and 'w' in board[r][c]:
-    #                     if len(self.Rules.GetListOfValidMoves(board, currentColor, squareClicked)) > 0:
-    #                         fromSquareChosen = 1
-    #                         fromTuple = squareClicked
-    #
-    #         elif fromSquareChosen and not toSquareChosen:
-    #             possibleDestinations = self.Rules.GetListOfValidMoves(board, currentColor, fromTuple)
-    #             self.Draw(board, possibleDestinations)
-    #             if squareClicked != []:
-    #                 (r, c) = squareClicked
-    #                 if squareClicked in possibleDestinations:
-    #                     toSquareChosen = 1
-    #                     toTuple = squareClicked
-    #                 elif currentColor == 'black' and 'b' in board[r][c]:
-    #                     if squareClicked == fromTuple:
-    #                         fromSquareChosen = 0
-    #                     elif len(self.Rules.GetListOfValidMoves(board, currentColor, squareClicked)) > 0:
-    #                         fromSquareChosen = 1
-    #                         fromTuple = squareClicked
-    #                     else:
-    #                         fromSquareChosen = 0  # piece is of own color, but no possible moves
-    #                 elif currentColor == 'white' and 'w' in board[r][c]:
-    #                     if squareClicked == fromTuple:
-    #                         fromSquareChosen = 0
-    #                     elif len(self.Rules.GetListOfValidMoves(board, currentColor, squareClicked)) > 0:
-    #                         fromSquareChosen = 1
-    #                         fromTuple = squareClicked
-    #                     else:
-    #                         fromSquareChosen = 0
-    #                 else:  # blank square or opposite color piece not in possible destinations clicked
-    #                     fromSquareChosen = 0
-    #
-    #     return (fromTuple, toTuple)
 
     def GetClickedSquare(self, mouseX, mouseY):
         # test function
@@ -263,28 +188,6 @@ class ChessGUI_pygame:
             return row, col
         else:
             return -1, -1
-
-    # def TestRoutine(self):
-    #     # test function
-    #     pygame.event.set_blocked(MOUSEMOTION)
-    #     while 1:
-    #         e = pygame.event.wait()
-    #         if e.type is QUIT:
-    #             return
-    #         if e.type is KEYDOWN:
-    #             if e.key is K_ESCAPE:
-    #                 pygame.quit()
-    #                 return
-    #         if e.type is MOUSEBUTTONDOWN:
-    #             (mouseX, mouseY) = pygame.mouse.get_pos()
-    #             # x is horizontal, y is vertical
-    #             # (x=0,y=0) is upper-left corner of the screen
-    #             x, y = self.GetClickedSquare(mouseX, mouseY)
-    #             x, y = math.floor(x), math.floor(y)
-    #             (mouseX, mouseY) = pygame.mouse.get_pos()
-    #             a, b = self.GetClickedSquare(mouseX, mouseY)
-    #             a, b = math.floor(a), math.floor(b)
-    #             main.play(x, y, a, b)
 
 
 if __name__ == "__main__":
