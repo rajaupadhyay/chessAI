@@ -6,10 +6,6 @@ import math
 import os
 import copy
 piecesDict = {"ROOK": "R", "KNIGHT": "K", "BISHOP": "B", "QUEEN": "Q", "KING": "KI", "PAWN": "P"}
-
-# for k in piecesDict:
-#     print(k, piecesDict[k])
-
 counter = 0
 board = []
 attackingPieces1 = ["KI","R","B","Q","K"]
