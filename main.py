@@ -15,7 +15,6 @@ board = []
 attackingPieces1 = ["KI","R","B","Q","K"]
 attackingPieces2 = ["ki","r","b","q","k"]
 
-
 # WHITE PIECES ARE LOWERCASE AND BLACK PIECES ARE UPPERCASE
 def initialise():
     row8 = [piecesDict["ROOK"].lower(), piecesDict["KNIGHT"].lower(), piecesDict["BISHOP"].lower(),
@@ -82,8 +81,6 @@ def play():
                 pygame.quit()
                 sys.exit(0)
 
-
-
         x = 0
         while (x == 0):
             pygame.event.set_blocked(MOUSEMOTION)
@@ -121,8 +118,6 @@ def play():
                         print("CHECKED - PLAY TO PROTECT KING")
                         occ = 1
                         counter -= 1
-
-
             else:
                 print("YOU CAN NOT MOVE YOUR OPPONENTS PIECE")
 
@@ -152,7 +147,6 @@ def play():
         if board[targetPosx][targetPosy] == buffer and occ == 0:
             game.PrintMessage("INVALID - {} TRY AGAIN".format(player))
             counter -= 1
-
 
         counter += 1
         print("X", end=" ")
@@ -338,8 +332,6 @@ def validateAndMove(pieceX, pieceY, targetX, targetY, playerNo, attackingPieces)
         else:
             print("INVALID MOVE")
 
-
-
 #############################################################################################################################################
 # Function checks if the king is under attack - returns 1 if True else 0
 def checkKingSafe(board1, playerNo, attackingPieces):
@@ -521,7 +513,6 @@ def checkKingSafe(board1, playerNo, attackingPieces):
                 return 1
 
     return 0
-
 
 # def moveToProtect(board1,pieceX,pieceY,targetX,targetY,playerNo,attackingPieces):
 #     if playerNo == 1:
