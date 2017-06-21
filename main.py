@@ -106,8 +106,9 @@ def play():
                     occ = 1
                     counter -= 1
                 else:
-                    validateAndMove(piecePosx, piecePosy, targetPosx, targetPosy, flag, attackingPieces2)
-                    checkVal = checkKingSafe(board,flag, attackingPieces1)
+                    validateAndMove(board,piecePosx, piecePosy, targetPosx, targetPosy, flag, attackingPieces2)
+                    checkVal, attackerPos, kingPos = checkKingSafe(board,flag, attackingPieces1)
+                    print("CHECKVAL: {}".format(checkVal))
                     if checkVal == 1:
                         board = boardCopy
                         game.PrintMessage("INVALID (CHECKED) - {} TRY AGAIN".format(player))
@@ -126,8 +127,9 @@ def play():
                     occ = 1
                     counter -= 1
                 else:
-                    validateAndMove(piecePosx, piecePosy, targetPosx, targetPosy, flag, attackingPieces1)
-                    checkVal = checkKingSafe(board, flag, attackingPieces2)
+                    validateAndMove(board,piecePosx, piecePosy, targetPosx, targetPosy, flag, attackingPieces1)
+                    checkVal, attackerPos, kingPos = checkKingSafe(board, flag, attackingPieces2)
+                    print("CHECKVAL: {}".format(checkVal))
                     if checkVal == 1:
                         board = boardCopy
                         game.PrintMessage("INVALID (CHECKED) - {} TRY AGAIN".format(player))
@@ -157,6 +159,45 @@ def play():
         # Get position of attacker
         # Generate array of spaces between attacker and king unless attacker is within radius of 1
 
+        # attackerPos stores coordinates of attacking piece
+        if flag == 1:
+            binVal, attackerpos, kingPos = checkKingSafe(board,2,attackingPieces2)
+        else:
+            binVal, attackerpos, kingPos = checkKingSafe(board, 1, attackingPieces1)
+        tempBoard = copy.deepcopy(board)
+        print("attacker Position: {}".format(attackerpos))
+        print("King position: {}".format(kingPos))
+###################################################################################################################################################
+        # 1st check
+        if flag == 1:
+            tempPlayer = 2
+            tempAttackingPieces = attackingPieces2
+        else:
+            tempPlayer = 1
+            tempAttackingPieces = attackingPieces1
+
+        playerSafe = 0
+
+        eightMoves = []
+        eightMoves.extend([(kingPos[0],kingPos[1]-1), (kingPos[0],kingPos[1]+1), (kingPos[0]-1,kingPos[1]-1),
+                           (kingPos[0] - 1, kingPos[1]), (kingPos[0]-1,kingPos[1]+1), (kingPos[0]+1,kingPos[1]),
+                           (kingPos[0] + 1, kingPos[1]-1), (kingPos[0]+1,kingPos[1]+1)])
+
+        eightMoves = [move for move in eightMoves if (0<=move[0]<8 and 0<=move[1]<8)]
+
+        for move in eightMoves:
+            if boardCheck(tempBoard,kingPos[0],kingPos[1],move[0],move[1],tempPlayer,tempAttackingPieces) == 1:
+                subBoard = copy.deepcopy(tempBoard)
+                validateAndMove(subBoard,kingPos[0],kingPos[1],move[0],move[1],tempPlayer,tempAttackingPieces)
+                a,b,c = checkKingSafe(subBoard, tempPlayer, tempAttackingPieces)
+                if a == 0:
+                    playerSafe = 1
+                    break
+
+        # 2nd check - derive structure from playerSafe variable - build position board for all pieces.
+
+
+
         counter += 1
         print("X", end=" ")
         pos = ["a", "b", "c", "d", "e", "f", "g", "h"]
@@ -169,7 +210,7 @@ def play():
         game.Draw(board)
 
 
-def validateAndMove(pieceX, pieceY, targetX, targetY, playerNo, attackingPieces):
+def validateAndMove(board,pieceX, pieceY, targetX, targetY, playerNo, attackingPieces):
     if board[pieceX][pieceY] == 'p' or board[pieceX][pieceY] == 'P':
         print("000")
         if playerNo == 1:
@@ -355,25 +396,26 @@ def checkKingSafe(board1, playerNo, attackingPieces):
         if tempKing in board1[i]:
             KINGX, KINGY = i, board1[i].index(tempKing)
     print(KINGX,KINGY)
+
     if init == 0:
         if playerNo == 1:
             if KINGX + 1 < 8:
                 if KINGY - 1 >= 0:
                     if board1[KINGX+1][KINGY-1] == 'P':
                         print('here1')
-                        return 1
+                        return 1, (KINGX+1,KINGY-1), (KINGX,KINGY)
                 if KINGY + 1 < 8:
                     if board1[KINGX+1][KINGY+1] == 'P':
                         print('here2')
-                        return 1
+                        return 1, (KINGX+1,KINGY+1), (KINGX,KINGY)
         else:
             if KINGX - 1 >= 0:
                 if KINGY - 1 >= 0:
                     if board1[KINGX - 1][KINGY - 1] == 'p':
-                        return 1
+                        return 1, (KINGX-1,KINGY-1), (KINGX,KINGY)
                 if KINGY + 1 < 8:
                     if board1[KINGX - 1][KINGY + 1] == 'p':
-                        return 1
+                        return 1, (KINGX-1,KINGY+1), (KINGX,KINGY)
 
     leftY = KINGY-1
     if leftY >=0:
@@ -382,15 +424,15 @@ def checkKingSafe(board1, playerNo, attackingPieces):
         print(leftY)
         if board1[KINGX][leftY] == attackingPieces[1] or board1[KINGX][leftY] == attackingPieces[3]:
             print('here3')
-            return 1
+            return 1, (KINGX,leftY), (KINGX,KINGY)
 
     rightY = KINGY+1
     if rightY<8:
         while rightY<7 and board1[KINGX][rightY] == '_':
             rightY += 1
-        if board1[KINGX][rightY] == attackingPieces[1] or board1[KINGX][leftY] == attackingPieces[3]:
+        if board1[KINGX][rightY] == attackingPieces[1] or board1[KINGX][rightY] == attackingPieces[3]:
             print('here4')
-            return 1
+            return 1, (KINGX, rightY), (KINGX,KINGY)
 
     top = KINGX-1
     if top>=0:
@@ -398,7 +440,7 @@ def checkKingSafe(board1, playerNo, attackingPieces):
             top -= 1
         if board1[top][KINGY] == attackingPieces[1] or board1[top][KINGY] == attackingPieces[3]:
             print('here5')
-            return 1
+            return 1, (top,KINGY), (KINGX,KINGY)
 
     bottom = KINGX+1
     if bottom <8:
@@ -406,7 +448,7 @@ def checkKingSafe(board1, playerNo, attackingPieces):
             bottom += 1
         if board1[bottom][KINGY] == attackingPieces[1] or board1[bottom][KINGY] == attackingPieces[3]:
             print('here6')
-            return 1
+            return 1, (bottom, KINGY), (KINGX,KINGY)
 
     # DIAGONAL CHECKS FOR OPPONENTS ATTACKING QUEEN OR BISHOP
     topDiagonalX, topRightDiagonalY = KINGX-1, KINGY+1
@@ -417,7 +459,7 @@ def checkKingSafe(board1, playerNo, attackingPieces):
         print(topDiagonalX, topRightDiagonalY)
         if board1[topDiagonalX][topRightDiagonalY] == attackingPieces[2] or board1[topDiagonalX][topRightDiagonalY] == attackingPieces[3]:
             print('here7')
-            return 1
+            return 1, (topDiagonalX, topRightDiagonalY), (KINGX,KINGY)
 
     topDiagonalX, topLeftDiagonalY = KINGX-1, KINGY-1
     if topDiagonalX>=0 and topLeftDiagonalY>=0:
@@ -426,7 +468,7 @@ def checkKingSafe(board1, playerNo, attackingPieces):
             topLeftDiagonalY -= 1
         if board1[topDiagonalX][topLeftDiagonalY] == attackingPieces[2] or board1[topDiagonalX][topLeftDiagonalY] == attackingPieces[3]:
             print('here8')
-            return 1
+            return 1, (topDiagonalX, topLeftDiagonalY), (KINGX,KINGY)
 
     bottomDiagonalX, bottomRightDiagonalY = KINGX+1, KINGY+1
     if bottomDiagonalX <8 and bottomRightDiagonalY<8:
@@ -435,7 +477,7 @@ def checkKingSafe(board1, playerNo, attackingPieces):
             bottomRightDiagonalY += 1
         if board1[bottomDiagonalX][bottomRightDiagonalY] == attackingPieces[2] or board1[bottomDiagonalX][bottomRightDiagonalY] == attackingPieces[3]:
             print('here9')
-            return 1
+            return 1, (bottomDiagonalX, bottomRightDiagonalY), (KINGX,KINGY)
 
     bottomDiagonalX, bottomLeftDiagonalY = KINGX+1, KINGY-1
     if bottomDiagonalX<8 and bottomLeftDiagonalY>=0:
@@ -444,84 +486,84 @@ def checkKingSafe(board1, playerNo, attackingPieces):
             bottomLeftDiagonalY -= 1
         if board1[bottomDiagonalX][bottomLeftDiagonalY] == attackingPieces[2] or board1[bottomDiagonalX][bottomLeftDiagonalY] == attackingPieces[3]:
             print('here10')
-            return 1
+            return 1, (bottomDiagonalX, bottomLeftDiagonalY), (KINGX,KINGY)
 
     if KINGY-1>=0:
         if board1[KINGX][KINGY-1] == attackingPieces[0]:
             print('here11')
-            return 1
+            return 1, (KINGX,KINGY-1), (KINGX,KINGY)
 
     if KINGY+1<8:
         if board1[KINGX][KINGY+1] == attackingPieces[0]:
             print('here12')
-            return 1
+            return 1, (KINGX,KINGY+1), (KINGX,KINGY)
 
     if KINGX-1>=0:
         if KINGY-1>=0:
             if board1[KINGX-1][KINGY-1] == attackingPieces[0]:
                 print('here13')
-                return 1
+                return 1, (KINGX-1,KINGY-1), (KINGX,KINGY)
         if KINGY+1<8:
             if board1[KINGX-1][KINGY+1] == attackingPieces[0]:
                 print('here14')
-                return 1
+                return 1, (KINGX-1,KINGY+1), (KINGX,KINGY)
         if board1[KINGX-1][KINGY] == attackingPieces[0]:
             print('here15')
-            return 1
+            return 1, (KINGX-1,KINGY), (KINGX,KINGY)
 
     if KINGX+1<8:
         if board1[KINGX+1][KINGY] == attackingPieces[0]:
             print('here16')
-            return 1
+            return 1, (KINGX+1,KINGY), (KINGX,KINGY)
         if KINGY-1>=0:
             if board1[KINGX+1][KINGY-1] == attackingPieces[0]:
                 print('here17')
-                return 1
+                return 1, (KINGX+1,KINGY-1), (KINGX,KINGY)
         if KINGY+1<8:
             if board1[KINGX+1][KINGY+1] == attackingPieces[0]:
                 print('here18')
-                return 1
+                return 1, (KINGX+1,KINGY+1), (KINGX,KINGY)
 
     if KINGY-1>=0:
         if KINGX-2>=0:
             if board1[KINGX-2][KINGY-1] == attackingPieces[4]:
                 print('here19')
-                return 1
+                return 1, (KINGX-2,KINGY-1), (KINGX,KINGY)
         if KINGX+2<8:
             if board1[KINGX+2][KINGY-1] == attackingPieces[4]:
                 print('here20')
-                return 1
+                return 1, (KINGX+2,KINGY-1), (KINGX,KINGY)
     if KINGY-2>=0:
         if KINGX-1>=0:
             if board1[KINGX-1][KINGY-2] == attackingPieces[4]:
                 print('here21')
-                return 1
+                return 1, (KINGX-1,KINGY-2), (KINGX,KINGY)
         if KINGX+1<8:
             if board1[KINGX+1][KINGY-2] == attackingPieces[4]:
                 print('here22')
-                return 1
+                return 1, (KINGX+1,KINGY-2), (KINGX,KINGY)
 
     if KINGY+1<8:
         if KINGX-2>=0:
             if board1[KINGX-2][KINGY+1] == attackingPieces[4]:
                 print('here23')
-                return 1
+                return 1, (KINGX-2,KINGY+1), (KINGX,KINGY)
         if KINGX+2<8:
             if board1[KINGX+2][KINGY+1] == attackingPieces[4]:
                 print('here24')
-                return 1
+                return 1, (KINGX+2,KINGY+1), (KINGX,KINGY)
 
     if KINGY+2<8:
         if KINGX-1>=0:
             if board1[KINGX-1][KINGY+2] == attackingPieces[4]:
                 print('here25')
-                return 1
+                return 1, (KINGX-1,KINGY+2), (KINGX,KINGY)
         if KINGX+1<8:
             if board1[KINGX+1][KINGY+2] == attackingPieces[4]:
                 print('here26')
-                return 1
+                return 1, (KINGX+1,KINGY+2), (KINGX,KINGY)
 
-    return 0
+    return 0, (-1,-1), (KINGX,KINGY)
 
 
 
