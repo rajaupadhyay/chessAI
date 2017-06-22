@@ -191,11 +191,18 @@ def play():
                 validateAndMove(subBoard,kingPos[0],kingPos[1],move[0],move[1],tempPlayer,tempAttackingPieces)
                 a,b,c = checkKingSafe(subBoard, tempPlayer, tempAttackingPieces)
                 if a == 0:
-                    playerSafe = 1
+                    playerSafe = 1 # Player is safe
                     break
 
         # 2nd check - derive structure from playerSafe variable - build position board for all pieces.
 
+        if playerSafe == 1:
+            # Get all pieces by checking in tempAttackingPieces - store coordinates - check if still in check
+            subBoard = copy.deepcopy(tempBoard)
+            possibleRetaliations = []
+            for i in range(len(subBoard)):
+                for j in range(len(subBoard[0])):
+                    pass
 
 
         counter += 1
