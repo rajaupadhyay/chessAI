@@ -196,13 +196,29 @@ def play():
 
         # 2nd check - derive structure from playerSafe variable - build position board for all pieces.
 
-        if playerSafe == 1:
+        possibleRetaliations = []
+        if playerSafe == 0:
             # Get all pieces by checking in tempAttackingPieces - store coordinates - check if still in check
-            subBoard = copy.deepcopy(tempBoard)
-            possibleRetaliations = []
-            for i in range(len(subBoard)):
-                for j in range(len(subBoard[0])):
-                    pass
+            for i in range(len(tempBoard)):
+                for j in range(len(tempBoard[0])):
+                    if tempBoard[i][j] != '_' and tempBoard[i][j] not in tempAttackingPieces:
+                        possibleRetaliations.append((i,j))
+                        if boardCheck(tempBoard, i, j, attackerpos[0], attackerpos[1], tempPlayer, tempAttackingPieces) == 1:
+                            subBoard = copy.deepcopy(tempBoard)
+                            validateAndMove(subBoard,i,j,attackerpos[0], attackerpos[1], tempPlayer,tempAttackingPieces)
+                            a,b,c = checkKingSafe(subBoard, tempPlayer, tempAttackingPieces)
+                            if a == 0:
+                                playerSafe = 2
+                                break
+
+        # 3rd Check - Try intercept attacker
+
+        if playerSafe == 0:
+            
+
+
+
+
 
 
         counter += 1
@@ -574,7 +590,7 @@ def checkKingSafe(board1, playerNo, attackingPieces):
 
 
 
-# Function checks if game has ended (Checkmate) - returns 0 if True else 1
+# Function validates move
 def boardCheck(board1,pieceX,pieceY,targetX,targetY,playerNo,attackingPieces):
     if board1[pieceX][pieceY] == 'p' or board1[pieceX][pieceY] == 'P':
         print("000")
