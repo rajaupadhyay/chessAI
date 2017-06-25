@@ -145,6 +145,7 @@ def play():
         if board[targetPosx][targetPosy] == buffer and occ == 0:
             game.PrintMessage("INVALID - {} TRY AGAIN".format(player))
             counter -= 1
+###################################################################################################################################################
 
         # use boardCheck to check if opponent can make a move (If player 1 then check if player 2 can still make a move else game over.)
         # checkKingSafe if valid move found
@@ -167,7 +168,7 @@ def play():
         tempBoard = copy.deepcopy(board)
         print("attacker Position: {}".format(attackerpos))
         print("King position: {}".format(kingPos))
-###################################################################################################################################################
+
         # 1st check
         if flag == 1:
             tempPlayer = 2
@@ -176,50 +177,99 @@ def play():
             tempPlayer = 1
             tempAttackingPieces = attackingPieces1
 
-        playerSafe = 0
+        if checkKingSafe(tempBoard, tempPlayer, tempAttackingPieces) == 1:
 
-        eightMoves = []
-        eightMoves.extend([(kingPos[0],kingPos[1]-1), (kingPos[0],kingPos[1]+1), (kingPos[0]-1,kingPos[1]-1),
-                           (kingPos[0] - 1, kingPos[1]), (kingPos[0]-1,kingPos[1]+1), (kingPos[0]+1,kingPos[1]),
-                           (kingPos[0] + 1, kingPos[1]-1), (kingPos[0]+1,kingPos[1]+1)])
+            playerSafe = 0
 
-        eightMoves = [move for move in eightMoves if (0<=move[0]<8 and 0<=move[1]<8)]
+            eightMoves = []
+            eightMoves.extend([(kingPos[0],kingPos[1]-1), (kingPos[0],kingPos[1]+1), (kingPos[0]-1,kingPos[1]-1),
+                               (kingPos[0] - 1, kingPos[1]), (kingPos[0]-1,kingPos[1]+1), (kingPos[0]+1,kingPos[1]),
+                               (kingPos[0] + 1, kingPos[1]-1), (kingPos[0]+1,kingPos[1]+1)])
 
-        for move in eightMoves:
-            if boardCheck(tempBoard,kingPos[0],kingPos[1],move[0],move[1],tempPlayer,tempAttackingPieces) == 1:
-                subBoard = copy.deepcopy(tempBoard)
-                validateAndMove(subBoard,kingPos[0],kingPos[1],move[0],move[1],tempPlayer,tempAttackingPieces)
-                a,b,c = checkKingSafe(subBoard, tempPlayer, tempAttackingPieces)
-                if a == 0:
-                    playerSafe = 1 # Player is safe
-                    break
+            eightMoves = [move for move in eightMoves if (0<=move[0]<8 and 0<=move[1]<8)]
 
-        # 2nd check - derive structure from playerSafe variable - build position board for all pieces.
+            for move in eightMoves:
+                if boardCheck(tempBoard,kingPos[0],kingPos[1],move[0],move[1],tempPlayer,tempAttackingPieces) == 1:
+                    subBoard = copy.deepcopy(tempBoard)
+                    validateAndMove(subBoard,kingPos[0],kingPos[1],move[0],move[1],tempPlayer,tempAttackingPieces)
+                    a,b,c = checkKingSafe(subBoard, tempPlayer, tempAttackingPieces)
+                    if a == 0:
+                        playerSafe = 1 # Player is safe
+                        break
 
-        possibleRetaliations = []
-        if playerSafe == 0:
-            # Get all pieces by checking in tempAttackingPieces - store coordinates - check if still in check
-            for i in range(len(tempBoard)):
-                for j in range(len(tempBoard[0])):
-                    if tempBoard[i][j] != '_' and tempBoard[i][j] not in tempAttackingPieces:
-                        possibleRetaliations.append((i,j))
-                        if boardCheck(tempBoard, i, j, attackerpos[0], attackerpos[1], tempPlayer, tempAttackingPieces) == 1:
+            # 2nd check - derive structure from playerSafe variable - build position board for all pieces.
+
+            possibleRetaliations = []
+            if playerSafe == 0:
+                # Get all pieces by checking in tempAttackingPieces - store coordinates - check if still in check
+                for i in range(len(tempBoard)):
+                    for j in range(len(tempBoard[0])):
+                        if tempBoard[i][j] != '_' and tempBoard[i][j] not in tempAttackingPieces:
+                            possibleRetaliations.append((i,j))
+                            if boardCheck(tempBoard, i, j, attackerpos[0], attackerpos[1], tempPlayer, tempAttackingPieces) == 1:
+                                subBoard = copy.deepcopy(tempBoard)
+                                validateAndMove(subBoard,i,j,attackerpos[0], attackerpos[1], tempPlayer,tempAttackingPieces)
+                                a,b,c = checkKingSafe(subBoard, tempPlayer, tempAttackingPieces)
+                                if a == 0:
+                                    playerSafe = 2
+                                    break
+
+            # 3rd Check - Try intercept attacker
+            intermediatePositions = []
+            if playerSafe == 0 and tempBoard[attackerpos[0]][attackerpos[1]].lower() != 'k':
+                if attackerpos[0] < kingPos[0]:
+                    if attackerpos[1] > kingPos[1]:
+                        yVal = attackerpos[1]-1
+                        for m in range(attackerpos[0]+1,kingPos[0]):
+                            intermediatePositions.append((m,yVal))
+                            yVal -= 1
+
+                    elif attackerpos[1] == kingPos[1]:
+                        for m in range(attackerpos[0]+1, kingPos[0]):
+                            intermediatePositions.append((m,kingPos[1]))
+
+                    else:
+                        yVal = attackerpos[1]+1
+                        for m in range(attackerpos[0]+1, kingPos[0]):
+                            intermediatePositions.append((m,yVal))
+                            yVal += 1
+
+                elif attackerpos[0] > kingPos[0]:
+                    if attackerpos[1] > kingPos[1]:
+                        yVal = kingPos[1]+1
+                        for m in range(kingPos[0] + 1, attackerpos[0]):
+                            intermediatePositions.append((m, yVal))
+                            yVal += 1
+
+                    elif attackerpos[1] == kingPos[1]:
+                        for m in range(kingPos[0] + 1, attackerpos[0]):
+                            intermediatePositions.append((m, kingPos[1]))
+
+                    else:
+                        yVal = kingPos[1] - 1
+                        for m in range(kingPos[0] + 1, attackerpos[0]):
+                            intermediatePositions.append((m, yVal))
+                            yVal -= 1
+
+                else:
+                    if kingPos[1] < attackerpos[1]:
+                        intermediatePositions[:] = [(kingPos[0], y) for y in range(kingPos[1]+1,attackerpos[1])]
+                    else:
+                        intermediatePositions[:] = [(kingPos[0], y) for y in range(attackerpos[1] + 1, kingPos[1])]
+
+                for ret in possibleRetaliations:
+                    for pos in intermediatePositions:
+                        if boardCheck(tempBoard, ret[0], ret[1], pos[0], pos[1], tempPlayer,tempAttackingPieces) == 1:
                             subBoard = copy.deepcopy(tempBoard)
-                            validateAndMove(subBoard,i,j,attackerpos[0], attackerpos[1], tempPlayer,tempAttackingPieces)
-                            a,b,c = checkKingSafe(subBoard, tempPlayer, tempAttackingPieces)
+                            validateAndMove(subBoard, ret[0], ret[1], pos[0], pos[1], tempPlayer, tempAttackingPieces)
+                            a, b, c = checkKingSafe(subBoard, tempPlayer, tempAttackingPieces)
                             if a == 0:
-                                playerSafe = 2
+                                playerSafe = 3
                                 break
 
-        # 3rd Check - Try intercept attacker
-
-        if playerSafe == 0:
-            
-
-
-
-
-
+            if playerSafe == 0:
+                game.PrintMessage("GAME OVER")
+        # GAME OVER
 
         counter += 1
         print("X", end=" ")
