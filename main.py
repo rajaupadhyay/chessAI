@@ -790,6 +790,100 @@ def boardCheck(board1,pieceX,pieceY,targetX,targetY,playerNo,attackingPieces):
         else:
             return 0
 
+
+
+def moveGenerator(pieceX, pieceY, playerNo):
+    possibleMoves = []
+    if playerNo == 1 and board[pieceX][pieceY] == 'p':
+        if pieceX+1<8:
+            possibleMoves.append((pieceX+1, pieceY))
+            if pieceY-1>=0:
+                possibleMoves.append((pieceX+1, pieceY-1))
+            if pieceY+1<8:
+                possibleMoves.append((pieceX+1, pieceY+1))
+        if pieceX+2<8:
+            possibleMoves.append((pieceX+2, pieceY))
+
+        return possibleMoves
+
+    if playerNo == 2 and board[pieceX][pieceY] == 'P':
+        if pieceX - 1 >= 0:
+            possibleMoves.append((pieceX-1, pieceY))
+            if pieceY - 1 >= 0:
+                possibleMoves.append((pieceX - 1, pieceY - 1))
+            if pieceY + 1 < 8:
+                possibleMoves.append((pieceX - 1, pieceY + 1))
+        if pieceX - 2 >= 0:
+            possibleMoves.append((pieceX - 2, pieceY))
+
+        return possibleMoves
+
+    if board[pieceX][pieceY] == 'r' or board[pieceX][pieceY] == "R":
+        if pieceY+1<8:
+            possibleMoves.extend([(pieceX,y) for y in range(pieceY+1,8)])
+        if pieceY-1>=0:
+            possibleMoves.extend([(pieceX, y) for y in range(0,pieceY)])
+        if pieceX+1<8:
+            possibleMoves.extend([(x, pieceY) for x in range(pieceX+1,8)])
+        if pieceX-1>=0:
+            possibleMoves.extend([(x, pieceY) for x in range(0,pieceX)])
+
+        return possibleMoves
+
+    if board[pieceX][pieceY] == 'k' or board[pieceX][pieceY] == 'K':
+        if pieceX+2<8:
+            if pieceY+1<8:
+                possibleMoves.append((pieceX+2,pieceY+1))
+            if pieceY-1>=0:
+                possibleMoves.append((pieceX+2,pieceY-1))
+        if pieceX-2>=0:
+            if pieceY + 1 < 8:
+                possibleMoves.append((pieceX - 2, pieceY + 1))
+            if pieceY - 1 >= 0:
+                possibleMoves.append((pieceX - 2, pieceY - 1))
+        if pieceY-2>=0:
+            if pieceX-1>=0:
+                possibleMoves.append((pieceX-1,pieceY-2))
+            if pieceX+1<8:
+                possibleMoves.append((pieceX+1,pieceY-2))
+        if pieceY+2<8:
+            if pieceX-1>=0:
+                possibleMoves.append((pieceX-1,pieceY+2))
+            if pieceX+1<8:
+                possibleMoves.append((pieceX+1,pieceY+2))
+
+        return possibleMoves
+
+    if board[pieceX][pieceY] == "b" or board[pieceX][pieceY] == "B":
+        x, y = pieceX+1, pieceY-1
+        while x<8 and pieceY>=0:
+            possibleMoves.append((x, y))
+            x += 1
+            y -= 1
+        x, y = pieceX+1, pieceY+1
+        while x<8 and pieceY<8:
+            possibleMoves.append((x, y))
+            x += 1
+            y += 1
+        x, y = pieceX - 1, pieceY - 1
+        while x >= 0 and pieceY >= 0:
+            possibleMoves.append((x, y))
+            x -= 1
+            y -= 1
+        x, y = pieceX - 1, pieceY + 1
+        while x >= 0 and pieceY < 8:
+            possibleMoves.append((x, y))
+            x -= 1
+            y += 1
+        return possibleMoves
+
+    
+
+
+
+
+
+
 #############################################################################################################################################
 if __name__ == "__main__":
     game = gui.ChessGUI_pygame()
