@@ -60,8 +60,9 @@ def play():
         # piecePosx = int(stringVal[1]) - 1
         # targetPosy = ord(stringVal[2]) - ord('a')
         # targetPosx = int(stringVal[3]) - 1
+
         x=0
-        while(x == 0):
+        while x == 0:
             pygame.event.set_blocked(MOUSEMOTION)
             e = pygame.event.wait()
             if e.type is MOUSEBUTTONDOWN:
@@ -78,7 +79,7 @@ def play():
                 sys.exit(0)
 
         x = 0
-        while (x == 0):
+        while x == 0:
             pygame.event.set_blocked(MOUSEMOTION)
             e = pygame.event.wait()
             if e.type is MOUSEBUTTONDOWN:
@@ -94,6 +95,7 @@ def play():
                 pygame.quit()
                 sys.exit(0)
 
+
         buffer = board[targetPosx][targetPosy]
         # CHECK IF POSITIONS DEFINED ARE VALID
         boardCopy = copy.deepcopy(board)
@@ -106,7 +108,9 @@ def play():
                     occ = 1
                     counter -= 1
                 else:
-                    validateAndMove(board,piecePosx, piecePosy, targetPosx, targetPosy, flag, attackingPieces2)
+                    # validateAndMove(board,piecePosx, piecePosy, targetPosx, targetPosy, flag, attackingPieces2)
+                    if boardCheck(board,piecePosx,piecePosy,targetPosx,targetPosy,flag,attackingPieces2) == 1:
+                        board[piecePosx][piecePosy], board[targetPosx][targetPosy] = "_", board[piecePosx][piecePosy]
                     checkVal, attackerPos, kingPos = checkKingSafe(board,flag, attackingPieces1)
                     print("CHECKVAL: {}".format(checkVal))
                     if checkVal == 1:
@@ -127,7 +131,9 @@ def play():
                     occ = 1
                     counter -= 1
                 else:
-                    validateAndMove(board,piecePosx, piecePosy, targetPosx, targetPosy, flag, attackingPieces1)
+                    # validateAndMove(board,piecePosx, piecePosy, targetPosx, targetPosy, flag, attackingPieces1)
+                    if boardCheck(board, piecePosx, piecePosy, targetPosx, targetPosy, flag, attackingPieces1) == 1:
+                        board[piecePosx][piecePosy], board[targetPosx][targetPosy] = "_", board[piecePosx][piecePosy]
                     checkVal, attackerPos, kingPos = checkKingSafe(board, flag, attackingPieces2)
                     print("CHECKVAL: {}".format(checkVal))
                     if checkVal == 1:
@@ -164,7 +170,7 @@ def play():
         if flag == 1:
             binVal, attackerpos, kingPos = checkKingSafe(board,2,attackingPieces2)
         else:
-            binVal, attackerpos, kingPos = checkKingSafe(board, 1, attackingPieces1)
+            binVal, attackerpos, kingPos = checkKingSafe(board,1, attackingPieces1)
         tempBoard = copy.deepcopy(board)
         print("attacker Position: {}".format(attackerpos))
         print("King position: {}".format(kingPos))
@@ -173,11 +179,15 @@ def play():
         if flag == 1:
             tempPlayer = 2
             tempAttackingPieces = attackingPieces2
+            yourPieces = attackingPieces1
         else:
             tempPlayer = 1
             tempAttackingPieces = attackingPieces1
+            yourPieces = attackingPieces2
 
-        if checkKingSafe(tempBoard, tempPlayer, tempAttackingPieces) == 1:
+        binVal1, q1,q2 = checkKingSafe(tempBoard, tempPlayer, tempAttackingPieces)
+
+        if binVal1 == 1:
 
             playerSafe = 0
 
@@ -186,15 +196,23 @@ def play():
                                (kingPos[0] - 1, kingPos[1]), (kingPos[0]-1,kingPos[1]+1), (kingPos[0]+1,kingPos[1]),
                                (kingPos[0] + 1, kingPos[1]-1), (kingPos[0]+1,kingPos[1]+1)])
 
-            eightMoves = [move for move in eightMoves if (0<=move[0]<8 and 0<=move[1]<8)]
-
+            print("YOUR PIECES: ", yourPieces)
+            eightMoves = [move for move in eightMoves if (0<=move[0]<8 and 0<=move[1]<8 and
+                                                          ((tempBoard[move[0]][move[1]].islower() and tempBoard[kingPos[0]][kingPos[1]].isupper()) or
+                                                           (tempBoard[move[0]][move[1]].isupper() and tempBoard[kingPos[0]][kingPos[1]].islower())))]
+            print("THE MOVES:", eightMoves)
             for move in eightMoves:
-                if boardCheck(tempBoard,kingPos[0],kingPos[1],move[0],move[1],tempPlayer,tempAttackingPieces) == 1:
+                print("MOVE:",move)
+                if boardCheck(tempBoard,kingPos[0],kingPos[1],move[0],move[1],tempPlayer,yourPieces) == 1:
+                    print("BOARD CHECK PASS FOR MOVE:", move)
                     subBoard = copy.deepcopy(tempBoard)
-                    validateAndMove(subBoard,kingPos[0],kingPos[1],move[0],move[1],tempPlayer,tempAttackingPieces)
+                    # validateAndMove(subBoard,kingPos[0],kingPos[1],move[0],move[1],tempPlayer,tempAttackingPieces)
+                    subBoard[move[0]][move[1]] = subBoard[kingPos[0]][kingPos[1]]
+                    subBoard[kingPos[0]][kingPos[1]] = "_"
                     a,b,c = checkKingSafe(subBoard, tempPlayer, tempAttackingPieces)
                     if a == 0:
                         playerSafe = 1 # Player is safe
+                        print("SAFE CHECK 1")
                         break
 
             # 2nd check - derive structure from playerSafe variable - build position board for all pieces.
@@ -206,9 +224,10 @@ def play():
                     for j in range(len(tempBoard[0])):
                         if tempBoard[i][j] != '_' and tempBoard[i][j] not in tempAttackingPieces:
                             possibleRetaliations.append((i,j))
-                            if boardCheck(tempBoard, i, j, attackerpos[0], attackerpos[1], tempPlayer, tempAttackingPieces) == 1:
+                            if boardCheck(tempBoard, i, j, attackerpos[0], attackerpos[1], tempPlayer, yourPieces) == 1:
                                 subBoard = copy.deepcopy(tempBoard)
-                                validateAndMove(subBoard,i,j,attackerpos[0], attackerpos[1], tempPlayer,tempAttackingPieces)
+                                # validateAndMove(subBoard,i,j,attackerpos[0], attackerpos[1], tempPlayer,tempAttackingPieces)
+                                subBoard[i][j], subBoard[attackerpos[0]][attackerpos[1]] = "_",subBoard[i][j]
                                 a,b,c = checkKingSafe(subBoard, tempPlayer, tempAttackingPieces)
                                 if a == 0:
                                     playerSafe = 2
@@ -259,16 +278,21 @@ def play():
 
                 for ret in possibleRetaliations:
                     for pos in intermediatePositions:
-                        if boardCheck(tempBoard, ret[0], ret[1], pos[0], pos[1], tempPlayer,tempAttackingPieces) == 1:
+                        if boardCheck(tempBoard, ret[0], ret[1], pos[0], pos[1], tempPlayer,yourPieces) == 1:
                             subBoard = copy.deepcopy(tempBoard)
-                            validateAndMove(subBoard, ret[0], ret[1], pos[0], pos[1], tempPlayer, tempAttackingPieces)
+                            # validateAndMove(subBoard, ret[0], ret[1], pos[0], pos[1], tempPlayer, tempAttackingPieces)
+                            subBoard[ret[0]][ret[1]], subBoard[pos[0]][pos[1]] = "_", subBoard[ret[0]][ret[1]]
                             a, b, c = checkKingSafe(subBoard, tempPlayer, tempAttackingPieces)
                             if a == 0:
                                 playerSafe = 3
                                 break
 
+            print("***PLAYER SAFE: {}".format(playerSafe))
+
             if playerSafe == 0:
                 game.PrintMessage("GAME OVER")
+                print("**************GAME OVER**************")
+
         # GAME OVER
 
         counter += 1
@@ -281,179 +305,6 @@ def play():
             print(board[i])
 
         game.Draw(board)
-
-
-def validateAndMove(board,pieceX, pieceY, targetX, targetY, playerNo, attackingPieces):
-    if board[pieceX][pieceY] == 'p' or board[pieceX][pieceY] == 'P':
-        print("000")
-        if playerNo == 1:
-            if board[pieceX][pieceY] == 'p':
-                if targetY == pieceY:
-                    if board[pieceX + 1][pieceY] == '_':
-                        if pieceX == 1 and targetX == 3:
-                            board[pieceX][pieceY] = '_'
-                            board[targetX][targetY] = 'p'
-                        elif targetX - pieceX == 1:
-                            board[pieceX][pieceY] = '_'
-                            board[targetX][targetY] = 'p'
-                    else:
-                        print("INVALID MOVE")
-
-                elif abs(targetY - pieceY) == 1 and (targetX - pieceX) == 1:
-                    if board[targetX][targetY].isupper():
-                        board[pieceX][pieceY] = '_'
-                        board[targetX][targetY] = 'p'
-
-        if playerNo == 2:
-            if board[pieceX][pieceY] == 'P':
-                if targetY == pieceY:
-                    if board[pieceX - 1][pieceY] == '_':
-                        if pieceX == 6 and targetX == 4:
-                            board[pieceX][pieceY] = '_'
-                            board[targetX][targetY] = 'P'
-                        elif targetX - pieceX == -1:
-                            board[pieceX][pieceY] = '_'
-                            board[targetX][targetY] = 'P'
-                    else:
-                        print("INVALID MOVE")
-
-                elif abs(targetY - pieceY) == 1 and (targetX - pieceX) == -1:
-                    if board[targetX][targetY].islower():
-                        board[pieceX][pieceY] = '_'
-                        board[targetX][targetY] = 'P'
-
-    elif board[pieceX][pieceY] == attackingPieces[0]:
-        print("101")
-        if targetY == pieceY or targetY == pieceY - 1 or targetY == pieceY + 1:
-            if pieceX - targetX == 1:
-                board[pieceX][pieceY] = '_'
-                board[targetX][targetY] = attackingPieces[0]
-            elif pieceX - targetX == 0:
-                board[pieceX][pieceY] = '_'
-                board[targetX][targetY] = attackingPieces[0]
-            elif pieceX - targetX == -1:
-                board[pieceX][pieceY] = '_'
-                board[targetX][targetY] = attackingPieces[0]
-            else:
-                print("INVALID MOVE")
-        else:
-            print("INVALID MOVE")
-
-    elif board[pieceX][pieceY] == attackingPieces[1]:
-        print("202")
-        if targetX == pieceX:
-            if targetY - pieceY >= 0:
-                for i in range(abs(targetY - pieceY) - 1):
-                    if board[pieceX][pieceY + i + 1] != '_':
-                        print("INVALID MOVE")
-                        return
-                board[pieceX][pieceY] = '_'
-                board[targetX][targetY] = attackingPieces[1]
-            else:
-                for i in range(abs(targetY - pieceY) - 1):
-                    if board[targetX][targetY + i + 1] != '_':
-                        print("INVALID MOVE")
-                        return
-                board[pieceX][pieceY] = '_'
-                board[targetX][targetY] = attackingPieces[1]
-        elif targetY == pieceY:
-            if targetX - pieceX >= 0:
-                for i in range(abs(targetX - pieceX) - 1):
-                    if board[pieceX + i + 1][pieceY] != '_':
-                        print("INVALID MOVE")
-                        return
-                board[pieceX][pieceY] = '_'
-                board[targetX][targetY] = attackingPieces[1]
-            else:
-                for i in range(abs(targetX - pieceX) - 1):
-                    if board[targetX + i + 1][targetY] != '_':
-                        print("INVALID MOVE")
-                        return
-                board[pieceX][pieceY] = '_'
-                board[targetX][targetY] = attackingPieces[1]
-
-    elif board[pieceX][pieceY] == attackingPieces[2] or board[pieceX][pieceY] == attackingPieces[3]:
-        print("303")
-        buffer = board[pieceX][pieceY]
-        if abs(pieceX - targetX) == abs(pieceY - targetY):
-            print(pieceX, targetX)
-            if targetX < pieceX:
-                if targetY < pieceY:
-                    for x in range(pieceX - targetX - 1):
-                        if board[pieceX - x - 1][pieceY - x - 1] != '_':
-                            print("INVALID MOVE")
-                            return
-                    board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = buffer
-                else:
-                    for x in range(pieceX - targetX - 1):
-                        if board[pieceX - x - 1][pieceY + x + 1] != '_':
-                            print("INVALID MOVE")
-                            return
-                    board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = buffer
-            else:
-                if targetY < pieceY:
-                    for x in range(targetX - pieceX - 1):
-                        if board[pieceX + x + 1][pieceY - x - 1] != '_':
-                            print("INVALID MOVE")
-                            return
-                    board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = buffer
-                else:
-                    for x in range(targetX - pieceX - 1):
-                        if board[pieceX + x + 1][pieceY + x + 1] != '_':
-                            print("INVALID MOVE")
-                            return
-                    board[pieceX][pieceY] = '_'
-                    board[targetX][targetY] = buffer
-        else:
-            if board[pieceX][pieceY] == attackingPieces[3]:
-                if targetX == pieceX:
-                    if targetY - pieceY >= 0:
-                        for i in range(abs(targetY - pieceY) - 1):
-                            if board[pieceX][pieceY + i + 1] != '_':
-                                print("INVALID MOVE")
-                                return
-                        board[pieceX][pieceY] = '_'
-                        board[targetX][targetY] = attackingPieces[3]
-                    else:
-                        for i in range(abs(targetY - pieceY) - 1):
-                            if board[targetX][targetY + i + 1] != '_':
-                                print("INVALID MOVE")
-                                return
-                        board[pieceX][pieceY] = '_'
-                        board[targetX][targetY] = attackingPieces[3]
-                elif targetY == pieceY:
-                    if targetX - pieceX >= 0:
-                        for i in range(abs(targetX - pieceX) - 1):
-                            if board[pieceX + i + 1][pieceY] != '_':
-                                print("INVALID MOVE")
-                                return
-                        board[pieceX][pieceY] = '_'
-                        board[targetX][targetY] = attackingPieces[3]
-                    else:
-                        for i in range(abs(targetX - pieceX) - 1):
-                            if board[targetX + i + 1][targetY] != '_':
-                                print("INVALID MOVE")
-                                return
-                        board[pieceX][pieceY] = '_'
-                        board[targetX][targetY] = attackingPieces[3]
-                else:
-                    print("INVALID MOVE")
-            else:
-                print("INVALID MOVE")
-
-    elif board[pieceX][pieceY] == attackingPieces[4]:
-        print("404")
-        if (targetY == pieceY - 1 or targetY == pieceY + 1) and (targetX == pieceX - 2 or targetX == pieceX + 2):
-            board[pieceX][pieceY] = '_'
-            board[targetX][targetY] = attackingPieces[4]
-        elif (targetY == pieceY - 2 or targetY == pieceY + 2) and (targetX == pieceX - 1 or targetX == pieceX + 1):
-            board[pieceX][pieceY] = '_'
-            board[targetX][targetY] = attackingPieces[4]
-        else:
-            print("INVALID MOVE")
 
 #############################################################################################################################################
 # Function checks if the king is under attack - returns 1 if True else 0
@@ -792,6 +643,7 @@ def boardCheck(board1,pieceX,pieceY,targetX,targetY,playerNo,attackingPieces):
 
 
 
+# moveGen for AI - Could have also used this function to check if a move is valid or not but stuck with boardCheck since it's more optimal
 def moveGenerator(pieceX, pieceY, playerNo):
     possibleMoves = []
     if playerNo == 1 and board[pieceX][pieceY] == 'p':
@@ -818,7 +670,7 @@ def moveGenerator(pieceX, pieceY, playerNo):
 
         return possibleMoves
 
-    if board[pieceX][pieceY] == 'r' or board[pieceX][pieceY] == "R":
+    if board[pieceX][pieceY].lower() == 'r' or board[pieceX][pieceY].lower() == 'q':
         if pieceY+1<8:
             possibleMoves.extend([(pieceX,y) for y in range(pieceY+1,8)])
         if pieceY-1>=0:
@@ -827,10 +679,10 @@ def moveGenerator(pieceX, pieceY, playerNo):
             possibleMoves.extend([(x, pieceY) for x in range(pieceX+1,8)])
         if pieceX-1>=0:
             possibleMoves.extend([(x, pieceY) for x in range(0,pieceX)])
+        if board[pieceX][pieceY].lower() == "r":
+            return possibleMoves
 
-        return possibleMoves
-
-    if board[pieceX][pieceY] == 'k' or board[pieceX][pieceY] == 'K':
+    if board[pieceX][pieceY].lower() == 'k':
         if pieceX+2<8:
             if pieceY+1<8:
                 possibleMoves.append((pieceX+2,pieceY+1))
@@ -854,7 +706,7 @@ def moveGenerator(pieceX, pieceY, playerNo):
 
         return possibleMoves
 
-    if board[pieceX][pieceY] == "b" or board[pieceX][pieceY] == "B":
+    if board[pieceX][pieceY].lower() == "b" or board[pieceX][pieceY].lower() == "q":
         x, y = pieceX+1, pieceY-1
         while x<8 and pieceY>=0:
             possibleMoves.append((x, y))
@@ -875,13 +727,26 @@ def moveGenerator(pieceX, pieceY, playerNo):
             possibleMoves.append((x, y))
             x -= 1
             y += 1
+
         return possibleMoves
 
-    
+    if board[pieceX][pieceY].lower() == "ki":
+        if pieceX+1<8:
+            if pieceY-1>=0:
+                possibleMoves.append((pieceX+1,pieceY-1))
+                possibleMoves.append((pieceX,pieceY-1))
+            if pieceY+1<8:
+                possibleMoves.append((pieceX + 1, pieceY + 1))
+                possibleMoves.append((pieceX,pieceY+1))
+            possibleMoves.append((pieceX+1,pieceY))
+        if pieceX-1>=0:
+            if pieceY-1>=0:
+                possibleMoves.append((pieceX-1,pieceY-1))
+            if pieceY+1<8:
+                possibleMoves.append((pieceX-1,pieceY+1))
+            possibleMoves.append((pieceX-1,pieceY))
 
-
-
-
+        return possibleMoves
 
 
 #############################################################################################################################################
