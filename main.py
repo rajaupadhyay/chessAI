@@ -5,6 +5,8 @@ from pygame.locals import *
 import math
 import os
 import copy
+import random
+
 piecesDict = {"ROOK": "R", "KNIGHT": "K", "BISHOP": "B", "QUEEN": "Q", "KING": "KI", "PAWN": "P"}
 counter = 0
 board = []
@@ -61,39 +63,58 @@ def play():
         # targetPosy = ord(stringVal[2]) - ord('a')
         # targetPosx = int(stringVal[3]) - 1
 
-        x=0
-        while x == 0:
-            pygame.event.set_blocked(MOUSEMOTION)
-            e = pygame.event.wait()
-            if e.type is MOUSEBUTTONDOWN:
-                (mouseX, mouseY) = pygame.mouse.get_pos()
-                piecePosx, piecePosy = game.GetClickedSquare(mouseX, mouseY)
-                piecePosx, piecePosy = math.floor(piecePosx), math.floor(piecePosy)
-                if piecePosx == -1 and piecePosy == -1:
-                    print("ERROR1")
-                    game.PrintMessage("INVALID - {} TRY AGAIN".format(player))
-                    counter -= 1
-                x = 1
-            if e.type is QUIT:  # the "x" kill button
-                pygame.quit()
-                sys.exit(0)
+        if flag == 1:
+            x=0
+            while x == 0:
+                pygame.event.set_blocked(MOUSEMOTION)
+                e = pygame.event.wait()
+                if e.type is MOUSEBUTTONDOWN:
+                    (mouseX, mouseY) = pygame.mouse.get_pos()
+                    piecePosx, piecePosy = game.GetClickedSquare(mouseX, mouseY)
+                    piecePosx, piecePosy = math.floor(piecePosx), math.floor(piecePosy)
+                    if piecePosx == -1 and piecePosy == -1:
+                        print("ERROR1")
+                        game.PrintMessage("INVALID - {} TRY AGAIN".format(player))
+                        counter -= 1
+                    x = 1
+                if e.type is QUIT:  # the "x" kill button
+                    pygame.quit()
+                    sys.exit(0)
 
-        x = 0
-        while x == 0:
-            pygame.event.set_blocked(MOUSEMOTION)
-            e = pygame.event.wait()
-            if e.type is MOUSEBUTTONDOWN:
-                (mouseX, mouseY) = pygame.mouse.get_pos()
-                targetPosx, targetPosy = game.GetClickedSquare(mouseX, mouseY)
-                targetPosx, targetPosy = math.floor(targetPosx), math.floor(targetPosy)
-                if targetPosx == -1 and targetPosy == -1:
-                    print("ERROR2")
-                    game.PrintMessage("INVALID - {} TRY AGAIN".format(player))
-                    counter -= 1
-                x = 1
-            if e.type is QUIT:  # the "x" kill button
-                pygame.quit()
-                sys.exit(0)
+            x = 0
+            while x == 0:
+                pygame.event.set_blocked(MOUSEMOTION)
+                e = pygame.event.wait()
+                if e.type is MOUSEBUTTONDOWN:
+                    (mouseX, mouseY) = pygame.mouse.get_pos()
+                    targetPosx, targetPosy = game.GetClickedSquare(mouseX, mouseY)
+                    targetPosx, targetPosy = math.floor(targetPosx), math.floor(targetPosy)
+                    if targetPosx == -1 and targetPosy == -1:
+                        print("ERROR2")
+                        game.PrintMessage("INVALID - {} TRY AGAIN".format(player))
+                        counter -= 1
+                    x = 1
+                if e.type is QUIT:  # the "x" kill button
+                    pygame.quit()
+                    sys.exit(0)
+        else: # Random AI
+            val = 0
+            while val == 0:
+                piecePosx = random.randint(0,7)
+                pieceList = [piece for piece in attackingPieces1+["P"] if piece in board[piecePosx]]
+                if pieceList:
+                    piecePosy = board[piecePosx].index(pieceList[random.randint(0,len(pieceList)-1)])
+
+                    targetList = moveGenerator(piecePosx, piecePosy, flag)
+                    print("TARGETS:", targetList)
+                    if targetList:
+                        randMove = targetList[random.randint(0,len(targetList)-1)]
+                        print(randMove)
+                        if board[randMove[0]][randMove[1]].islower() or board[randMove[0]][randMove[1]] == '_':
+                            targetPosx = randMove[0]
+                            targetPosy = randMove[1]
+                            val = 1
+
 
 
         buffer = board[targetPosx][targetPosy]
@@ -115,7 +136,7 @@ def play():
                     print("CHECKVAL: {}".format(checkVal))
                     if checkVal == 1:
                         board = boardCopy
-                        game.PrintMessage("INVALID (CHECKED) - {} TRY AGAIN".format(player))
+                        # game.PrintMessage("INVALID (CHECKED) - {} TRY AGAIN".format(player))
                         print("CHECKED - PLAY TO PROTECT KING")
                         occ = 1
                         counter -= 1
@@ -127,7 +148,7 @@ def play():
                 # Logic for moving to target pos (new func)
                 if board[targetPosx][targetPosy].isupper():
                     print("CAN NOT MOVE PIECE TO SPECIFIED COORDINATES (PREOCCUPIED BY YOUR PIECE)")
-                    game.PrintMessage("INVALID - {} TRY AGAIN".format(player))
+                    # game.PrintMessage("INVALID - {} TRY AGAIN".format(player))
                     occ = 1
                     counter -= 1
                 else:
@@ -149,7 +170,8 @@ def play():
             print("NO PIECE PRESENT AT THE POSITION SPECIFIED")
 
         if board[targetPosx][targetPosy] == buffer and occ == 0:
-            game.PrintMessage("INVALID - {} TRY AGAIN".format(player))
+            if flag == 1:
+                game.PrintMessage("INVALID - {} TRY AGAIN".format(player))
             counter -= 1
 ###################################################################################################################################################
 
