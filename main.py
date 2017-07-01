@@ -6,6 +6,7 @@ import math
 import os
 import copy
 import random
+import time
 
 piecesDict = {"ROOK": "R", "KNIGHT": "K", "BISHOP": "B", "QUEEN": "Q", "KING": "KI", "PAWN": "P"}
 counter = 0
@@ -100,20 +101,24 @@ def play():
         else: # Random AI
             val = 0
             while val == 0:
-                piecePosx = random.randint(0,7)
-                pieceList = [piece for piece in attackingPieces1+["P"] if piece in board[piecePosx]]
-                if pieceList:
-                    piecePosy = board[piecePosx].index(pieceList[random.randint(0,len(pieceList)-1)])
+                checked, attacker, myKingPos = checkKingSafe(board,flag,attackingPieces2)
+                if checked == 1:
+                    piecePosx, piecePosy = myKingPos[0], myKingPos[1]
+                else:
+                    piecePosx = random.randint(0,7)
+                    pieceList = [piece for piece in attackingPieces1+["P"] if piece in board[piecePosx]]
+                    if pieceList:
+                        piecePosy = board[piecePosx].index(pieceList[random.randint(0,len(pieceList)-1)])
 
-                    targetList = moveGenerator(piecePosx, piecePosy, flag)
-                    print("TARGETS:", targetList)
-                    if targetList:
-                        randMove = targetList[random.randint(0,len(targetList)-1)]
-                        print(randMove)
-                        if board[randMove[0]][randMove[1]].islower() or board[randMove[0]][randMove[1]] == '_':
-                            targetPosx = randMove[0]
-                            targetPosy = randMove[1]
-                            val = 1
+                targetList = moveGenerator(piecePosx, piecePosy, flag)
+                print("TARGETS:", targetList)
+                if targetList:
+                    randMove = targetList[random.randint(0,len(targetList)-1)]
+                    print(randMove)
+                    if board[randMove[0]][randMove[1]].islower() or board[randMove[0]][randMove[1]] == '_':
+                        targetPosx = randMove[0]
+                        targetPosy = randMove[1]
+                        val = 1
 
 
 
@@ -159,7 +164,7 @@ def play():
                     print("CHECKVAL: {}".format(checkVal))
                     if checkVal == 1:
                         board = boardCopy
-                        game.PrintMessage("INVALID (CHECKED) - {} TRY AGAIN".format(player))
+                        # game.PrintMessage("INVALID (CHECKED) - {} TRY AGAIN".format(player))
                         print("CHECKED - PLAY TO PROTECT KING")
                         occ = 1
                         counter -= 1
@@ -313,7 +318,12 @@ def play():
 
             if playerSafe == 0:
                 game.PrintMessage("GAME OVER")
+                game.Draw(board)
                 print("**************GAME OVER**************")
+                time.sleep(120)
+                pygame.quit()
+                sys.exit(0)
+
 
         # GAME OVER
 
@@ -730,22 +740,22 @@ def moveGenerator(pieceX, pieceY, playerNo):
 
     if board[pieceX][pieceY].lower() == "b" or board[pieceX][pieceY].lower() == "q":
         x, y = pieceX+1, pieceY-1
-        while x<8 and pieceY>=0:
+        while x<8 and y>=0:
             possibleMoves.append((x, y))
             x += 1
             y -= 1
         x, y = pieceX+1, pieceY+1
-        while x<8 and pieceY<8:
+        while x<8 and y<8:
             possibleMoves.append((x, y))
             x += 1
             y += 1
         x, y = pieceX - 1, pieceY - 1
-        while x >= 0 and pieceY >= 0:
+        while x >= 0 and y >= 0:
             possibleMoves.append((x, y))
             x -= 1
             y -= 1
         x, y = pieceX - 1, pieceY + 1
-        while x >= 0 and pieceY < 8:
+        while x >= 0 and y < 8:
             possibleMoves.append((x, y))
             x -= 1
             y += 1
