@@ -180,150 +180,7 @@ def play():
             counter -= 1
 ###################################################################################################################################################
 
-        # use boardCheck to check if opponent can make a move (If player 1 then check if player 2 can still make a move else game over.)
-        # checkKingSafe if valid move found
-        # Knight can jump over pieces
-        # Implement diagonal checking for Queen and Bishop
-        # Get array(spaces) between king and attacker
-        # 1st check - try move king to either of 8 positions to avoid check
-        # 2nd check - try attack the attacker
-        # 3rd check - try intercept attacker by placing a piece in between attacker and king (EXCEPT IF ATTACKER = KNIGHT)
-        # If all 3 checks fail declare game over
-
-        # Get position of attacker
-        # Generate array of spaces between attacker and king unless attacker is within radius of 1
-
-        # attackerPos stores coordinates of attacking piece
-        if flag == 1:
-            binVal, attackerpos, kingPos = checkKingSafe(board,2,attackingPieces2)
-        else:
-            binVal, attackerpos, kingPos = checkKingSafe(board,1, attackingPieces1)
-        tempBoard = copy.deepcopy(board)
-        print("attacker Position: {}".format(attackerpos))
-        print("King position: {}".format(kingPos))
-
-        # 1st check
-        if flag == 1:
-            tempPlayer = 2
-            tempAttackingPieces = attackingPieces2
-            yourPieces = attackingPieces1
-        else:
-            tempPlayer = 1
-            tempAttackingPieces = attackingPieces1
-            yourPieces = attackingPieces2
-
-        binVal1, q1,q2 = checkKingSafe(tempBoard, tempPlayer, tempAttackingPieces)
-
-        if binVal1 == 1:
-
-            playerSafe = 0
-
-            eightMoves = []
-            eightMoves.extend([(kingPos[0],kingPos[1]-1), (kingPos[0],kingPos[1]+1), (kingPos[0]-1,kingPos[1]-1),
-                               (kingPos[0] - 1, kingPos[1]), (kingPos[0]-1,kingPos[1]+1), (kingPos[0]+1,kingPos[1]),
-                               (kingPos[0] + 1, kingPos[1]-1), (kingPos[0]+1,kingPos[1]+1)])
-
-            print("YOUR PIECES: ", yourPieces)
-            eightMoves = [move for move in eightMoves if (0<=move[0]<8 and 0<=move[1]<8 and
-                                                          ((tempBoard[move[0]][move[1]].islower() and tempBoard[kingPos[0]][kingPos[1]].isupper()) or
-                                                           (tempBoard[move[0]][move[1]].isupper() and tempBoard[kingPos[0]][kingPos[1]].islower())))]
-            print("THE MOVES:", eightMoves)
-            for move in eightMoves:
-                print("MOVE:",move)
-                if boardCheck(tempBoard,kingPos[0],kingPos[1],move[0],move[1],tempPlayer,yourPieces) == 1:
-                    print("BOARD CHECK PASS FOR MOVE:", move)
-                    subBoard = copy.deepcopy(tempBoard)
-                    # validateAndMove(subBoard,kingPos[0],kingPos[1],move[0],move[1],tempPlayer,tempAttackingPieces)
-                    subBoard[move[0]][move[1]] = subBoard[kingPos[0]][kingPos[1]]
-                    subBoard[kingPos[0]][kingPos[1]] = "_"
-                    a,b,c = checkKingSafe(subBoard, tempPlayer, tempAttackingPieces)
-                    if a == 0:
-                        playerSafe = 1 # Player is safe
-                        print("SAFE CHECK 1")
-                        break
-
-            # 2nd check - derive structure from playerSafe variable - build position board for all pieces.
-
-            possibleRetaliations = []
-            if playerSafe == 0:
-                # Get all pieces by checking in tempAttackingPieces - store coordinates - check if still in check
-                for i in range(len(tempBoard)):
-                    for j in range(len(tempBoard[0])):
-                        if tempBoard[i][j] != '_' and tempBoard[i][j] not in tempAttackingPieces:
-                            possibleRetaliations.append((i,j))
-                            if boardCheck(tempBoard, i, j, attackerpos[0], attackerpos[1], tempPlayer, yourPieces) == 1:
-                                subBoard = copy.deepcopy(tempBoard)
-                                # validateAndMove(subBoard,i,j,attackerpos[0], attackerpos[1], tempPlayer,tempAttackingPieces)
-                                subBoard[i][j], subBoard[attackerpos[0]][attackerpos[1]] = "_",subBoard[i][j]
-                                a,b,c = checkKingSafe(subBoard, tempPlayer, tempAttackingPieces)
-                                if a == 0:
-                                    playerSafe = 2
-                                    break
-
-            # 3rd Check - Try intercept attacker
-            intermediatePositions = []
-            if playerSafe == 0 and tempBoard[attackerpos[0]][attackerpos[1]].lower() != 'k':
-                if attackerpos[0] < kingPos[0]:
-                    if attackerpos[1] > kingPos[1]:
-                        yVal = attackerpos[1]-1
-                        for m in range(attackerpos[0]+1,kingPos[0]):
-                            intermediatePositions.append((m,yVal))
-                            yVal -= 1
-
-                    elif attackerpos[1] == kingPos[1]:
-                        for m in range(attackerpos[0]+1, kingPos[0]):
-                            intermediatePositions.append((m,kingPos[1]))
-
-                    else:
-                        yVal = attackerpos[1]+1
-                        for m in range(attackerpos[0]+1, kingPos[0]):
-                            intermediatePositions.append((m,yVal))
-                            yVal += 1
-
-                elif attackerpos[0] > kingPos[0]:
-                    if attackerpos[1] > kingPos[1]:
-                        yVal = kingPos[1]+1
-                        for m in range(kingPos[0] + 1, attackerpos[0]):
-                            intermediatePositions.append((m, yVal))
-                            yVal += 1
-
-                    elif attackerpos[1] == kingPos[1]:
-                        for m in range(kingPos[0] + 1, attackerpos[0]):
-                            intermediatePositions.append((m, kingPos[1]))
-
-                    else:
-                        yVal = kingPos[1] - 1
-                        for m in range(kingPos[0] + 1, attackerpos[0]):
-                            intermediatePositions.append((m, yVal))
-                            yVal -= 1
-
-                else:
-                    if kingPos[1] < attackerpos[1]:
-                        intermediatePositions[:] = [(kingPos[0], y) for y in range(kingPos[1]+1,attackerpos[1])]
-                    else:
-                        intermediatePositions[:] = [(kingPos[0], y) for y in range(attackerpos[1] + 1, kingPos[1])]
-
-                for ret in possibleRetaliations:
-                    for pos in intermediatePositions:
-                        if boardCheck(tempBoard, ret[0], ret[1], pos[0], pos[1], tempPlayer,yourPieces) == 1:
-                            subBoard = copy.deepcopy(tempBoard)
-                            # validateAndMove(subBoard, ret[0], ret[1], pos[0], pos[1], tempPlayer, tempAttackingPieces)
-                            subBoard[ret[0]][ret[1]], subBoard[pos[0]][pos[1]] = "_", subBoard[ret[0]][ret[1]]
-                            a, b, c = checkKingSafe(subBoard, tempPlayer, tempAttackingPieces)
-                            if a == 0:
-                                playerSafe = 3
-                                break
-
-            print("***PLAYER SAFE: {}".format(playerSafe))
-
-            if playerSafe == 0:
-                game.PrintMessage("GAME OVER")
-                game.Draw(board)
-                print("**************GAME OVER**************")
-                time.sleep(120)
-                pygame.quit()
-                sys.exit(0)
-
+        getOutOfCheck(flag)
 
         # GAME OVER
 
@@ -373,112 +230,6 @@ def checkKingSafe(board1, playerNo, attackingPieces):
                     if board1[KINGX - 1][KINGY + 1] == 'p':
                         return 1, (KINGX-1,KINGY+1), (KINGX,KINGY)
 
-    leftY = KINGY-1
-    if leftY >=0:
-        while leftY>0 and board1[KINGX][leftY] == '_':
-            leftY -= 1
-        print(leftY)
-        if board1[KINGX][leftY] == attackingPieces[1] or board1[KINGX][leftY] == attackingPieces[3]:
-            print('here3')
-            return 1, (KINGX,leftY), (KINGX,KINGY)
-
-    rightY = KINGY+1
-    if rightY<8:
-        while rightY<7 and board1[KINGX][rightY] == '_':
-            rightY += 1
-        if board1[KINGX][rightY] == attackingPieces[1] or board1[KINGX][rightY] == attackingPieces[3]:
-            print('here4')
-            return 1, (KINGX, rightY), (KINGX,KINGY)
-
-    top = KINGX-1
-    if top>=0:
-        while top>0 and board1[top][KINGY] == '_':
-            top -= 1
-        if board1[top][KINGY] == attackingPieces[1] or board1[top][KINGY] == attackingPieces[3]:
-            print('here5')
-            return 1, (top,KINGY), (KINGX,KINGY)
-
-    bottom = KINGX+1
-    if bottom <8:
-        while bottom<7 and board1[bottom][KINGY] == '_':
-            bottom += 1
-        if board1[bottom][KINGY] == attackingPieces[1] or board1[bottom][KINGY] == attackingPieces[3]:
-            print('here6')
-            return 1, (bottom, KINGY), (KINGX,KINGY)
-
-    # DIAGONAL CHECKS FOR OPPONENTS ATTACKING QUEEN OR BISHOP
-    topDiagonalX, topRightDiagonalY = KINGX-1, KINGY+1
-    if topDiagonalX>=0 and topRightDiagonalY<8:
-        while topDiagonalX>0 and topRightDiagonalY<7 and board1[topDiagonalX][topRightDiagonalY] == '_':
-            topDiagonalX -= 1
-            topRightDiagonalY += 1
-        print(topDiagonalX, topRightDiagonalY)
-        if board1[topDiagonalX][topRightDiagonalY] == attackingPieces[2] or board1[topDiagonalX][topRightDiagonalY] == attackingPieces[3]:
-            print('here7')
-            return 1, (topDiagonalX, topRightDiagonalY), (KINGX,KINGY)
-
-    topDiagonalX, topLeftDiagonalY = KINGX-1, KINGY-1
-    if topDiagonalX>=0 and topLeftDiagonalY>=0:
-        while topDiagonalX>0 and topLeftDiagonalY>0 and board1[topDiagonalX][topLeftDiagonalY] == '_':
-            topDiagonalX -= 1
-            topLeftDiagonalY -= 1
-        if board1[topDiagonalX][topLeftDiagonalY] == attackingPieces[2] or board1[topDiagonalX][topLeftDiagonalY] == attackingPieces[3]:
-            print('here8')
-            return 1, (topDiagonalX, topLeftDiagonalY), (KINGX,KINGY)
-
-    bottomDiagonalX, bottomRightDiagonalY = KINGX+1, KINGY+1
-    if bottomDiagonalX <8 and bottomRightDiagonalY<8:
-        while bottomDiagonalX<7 and bottomRightDiagonalY<7 and board1[bottomDiagonalX][bottomRightDiagonalY] == '_':
-            bottomDiagonalX += 1
-            bottomRightDiagonalY += 1
-        if board1[bottomDiagonalX][bottomRightDiagonalY] == attackingPieces[2] or board1[bottomDiagonalX][bottomRightDiagonalY] == attackingPieces[3]:
-            print('here9')
-            return 1, (bottomDiagonalX, bottomRightDiagonalY), (KINGX,KINGY)
-
-    bottomDiagonalX, bottomLeftDiagonalY = KINGX+1, KINGY-1
-    if bottomDiagonalX<8 and bottomLeftDiagonalY>=0:
-        while bottomDiagonalX<7 and bottomLeftDiagonalY>0 and board1[bottomDiagonalX][bottomLeftDiagonalY] == '_':
-            bottomDiagonalX += 1
-            bottomLeftDiagonalY -= 1
-        if board1[bottomDiagonalX][bottomLeftDiagonalY] == attackingPieces[2] or board1[bottomDiagonalX][bottomLeftDiagonalY] == attackingPieces[3]:
-            print('here10')
-            return 1, (bottomDiagonalX, bottomLeftDiagonalY), (KINGX,KINGY)
-
-    if KINGY-1>=0:
-        if board1[KINGX][KINGY-1] == attackingPieces[0]:
-            print('here11')
-            return 1, (KINGX,KINGY-1), (KINGX,KINGY)
-
-    if KINGY+1<8:
-        if board1[KINGX][KINGY+1] == attackingPieces[0]:
-            print('here12')
-            return 1, (KINGX,KINGY+1), (KINGX,KINGY)
-
-    if KINGX-1>=0:
-        if KINGY-1>=0:
-            if board1[KINGX-1][KINGY-1] == attackingPieces[0]:
-                print('here13')
-                return 1, (KINGX-1,KINGY-1), (KINGX,KINGY)
-        if KINGY+1<8:
-            if board1[KINGX-1][KINGY+1] == attackingPieces[0]:
-                print('here14')
-                return 1, (KINGX-1,KINGY+1), (KINGX,KINGY)
-        if board1[KINGX-1][KINGY] == attackingPieces[0]:
-            print('here15')
-            return 1, (KINGX-1,KINGY), (KINGX,KINGY)
-
-    if KINGX+1<8:
-        if board1[KINGX+1][KINGY] == attackingPieces[0]:
-            print('here16')
-            return 1, (KINGX+1,KINGY), (KINGX,KINGY)
-        if KINGY-1>=0:
-            if board1[KINGX+1][KINGY-1] == attackingPieces[0]:
-                print('here17')
-                return 1, (KINGX+1,KINGY-1), (KINGX,KINGY)
-        if KINGY+1<8:
-            if board1[KINGX+1][KINGY+1] == attackingPieces[0]:
-                print('here18')
-                return 1, (KINGX+1,KINGY+1), (KINGX,KINGY)
 
     if KINGY-1>=0:
         if KINGX-2>=0:
@@ -518,6 +269,83 @@ def checkKingSafe(board1, playerNo, attackingPieces):
             if board1[KINGX+1][KINGY+2] == attackingPieces[4]:
                 print('here26')
                 return 1, (KINGX+1,KINGY+2), (KINGX,KINGY)
+
+
+    leftY = KINGY-1
+    while leftY>=0:
+        if board1[KINGX][leftY] != "_":
+            if board1[KINGX][leftY] in attackingPieces[:-1]:
+                return 1, (KINGX,leftY), (KINGX,KINGY)
+            else:
+                break
+        leftY -= 1
+
+    rightY = KINGY+1
+    while rightY<8:
+        if board1[KINGX][rightY] != "_":
+            if board1[KINGX][rightY] in attackingPieces[:-1]:
+                return 1, (KINGX, rightY), (KINGX,KINGY)
+            else:
+                break
+        rightY += 1
+
+    topX = KINGX-1
+    while topX>=0:
+        if board1[topX][KINGY] != "_":
+            if board1[topX][KINGY] in attackingPieces[:-1]:
+                return 1, (topX, KINGY), (KINGX, KINGY)
+            else:
+                break
+        topX -= 1
+
+    bottomX = KINGX+1
+    while bottomX<8:
+        if board1[bottomX][KINGY] != "_":
+            if board1[bottomX][KINGY] in attackingPieces[:-1]:
+                return 1, (bottomX,KINGY), (KINGX, KINGY)
+            else:
+                break
+        bottomX += 1
+
+    bottomLeftX, bottomLeftY = KINGX+1, KINGY-1
+    while bottomLeftX<8 and bottomLeftY>=0:
+        if board1[bottomLeftX][bottomLeftY] != "_":
+            if board1[bottomLeftX][bottomLeftY] in attackingPieces[:-1]:
+                return 1, (bottomLeftX,bottomLeftY), (KINGX, KINGY)
+            else:
+                break
+        bottomLeftX += 1
+        bottomLeftY -= 1
+
+    bottomRightX, bottomRightY = KINGX+1,KINGY+1
+    while bottomRightX<8 and bottomRightY<8:
+        if board1[bottomRightX][bottomRightY] != "_":
+            if board1[bottomRightX][bottomRightY] in attackingPieces[:-1]:
+                return 1, (bottomRightX, bottomRightY), (KINGX, KINGY)
+            else:
+                break
+        bottomRightX += 1
+        bottomRightY += 1
+
+    topLeftX, topLeftY = KINGX-1,KINGY-1
+    while topLeftX>=0 and topLeftY>=0:
+        if board1[topLeftX][topLeftY] != "_":
+            if board1[topLeftX][topLeftY] in attackingPieces[:-1]:
+                return 1, (topLeftX, topLeftY), (KINGX, KINGY)
+            else:
+                break
+        topLeftX -= 1
+        topLeftY -= 1
+
+    topRightX, topRightY = KINGX-1, KINGY+1
+    while topRightX>=0 and topRightY<8:
+        if board1[topRightX][topRightY] != "_":
+            if board1[topRightX][topRightY] in attackingPieces[:-1]:
+                return 1, (topRightX, topRightY), (KINGX, KINGY)
+            else:
+                break
+        topRightX -= 1
+        topRightY += 1
 
     return 0, (-1,-1), (KINGX,KINGY)
 
@@ -779,6 +607,154 @@ def moveGenerator(pieceX, pieceY, playerNo):
             possibleMoves.append((pieceX-1,pieceY))
 
         return possibleMoves
+
+
+def getOutOfCheck(flag):
+    # use boardCheck to check if opponent can make a move (If player 1 then check if player 2 can still make a move else game over.)
+    # checkKingSafe if valid move found
+    # Knight can jump over pieces
+    # Implement diagonal checking for Queen and Bishop
+    # Get array(spaces) between king and attacker
+    # 1st check - try move king to either of 8 positions to avoid check
+    # 2nd check - try attack the attacker
+    # 3rd check - try intercept attacker by placing a piece in between attacker and king (EXCEPT IF ATTACKER = KNIGHT)
+    # If all 3 checks fail declare game over
+
+    # Get position of attacker
+    # Generate array of spaces between attacker and king unless attacker is within radius of 1
+
+    # attackerPos stores coordinates of attacking piece
+    if flag == 1:
+        binVal, attackerpos, kingPos = checkKingSafe(board, 2, attackingPieces2)
+    else:
+        binVal, attackerpos, kingPos = checkKingSafe(board, 1, attackingPieces1)
+    tempBoard = copy.deepcopy(board)
+    print("attacker Position: {}".format(attackerpos))
+    print("King position: {}".format(kingPos))
+
+    # 1st check
+    if flag == 1:
+        tempPlayer = 2
+        tempAttackingPieces = attackingPieces2
+        yourPieces = attackingPieces1
+    else:
+        tempPlayer = 1
+        tempAttackingPieces = attackingPieces1
+        yourPieces = attackingPieces2
+
+    binVal1, q1, q2 = checkKingSafe(tempBoard, tempPlayer, tempAttackingPieces)
+
+    if binVal1 == 1:
+
+        playerSafe = 0
+
+        eightMoves = []
+        eightMoves.extend([(kingPos[0], kingPos[1] - 1), (kingPos[0], kingPos[1] + 1), (kingPos[0] - 1, kingPos[1] - 1),
+                           (kingPos[0] - 1, kingPos[1]), (kingPos[0] - 1, kingPos[1] + 1), (kingPos[0] + 1, kingPos[1]),
+                           (kingPos[0] + 1, kingPos[1] - 1), (kingPos[0] + 1, kingPos[1] + 1)])
+
+        print("YOUR PIECES: ", yourPieces)
+        eightMoves = [move for move in eightMoves if (0 <= move[0] < 8 and 0 <= move[1] < 8 and
+                                                      ((tempBoard[move[0]][move[1]].islower() and tempBoard[kingPos[0]][
+                                                          kingPos[1]].isupper()) or
+                                                       (tempBoard[move[0]][move[1]].isupper() and tempBoard[kingPos[0]][
+                                                           kingPos[1]].islower())))]
+        print("THE MOVES:", eightMoves)
+        for move in eightMoves:
+            print("MOVE:", move)
+            if boardCheck(tempBoard, kingPos[0], kingPos[1], move[0], move[1], tempPlayer, yourPieces) == 1:
+                print("BOARD CHECK PASS FOR MOVE:", move)
+                subBoard = copy.deepcopy(tempBoard)
+                # validateAndMove(subBoard,kingPos[0],kingPos[1],move[0],move[1],tempPlayer,tempAttackingPieces)
+                subBoard[move[0]][move[1]] = subBoard[kingPos[0]][kingPos[1]]
+                subBoard[kingPos[0]][kingPos[1]] = "_"
+                a, b, c = checkKingSafe(subBoard, tempPlayer, tempAttackingPieces)
+                if a == 0:
+                    playerSafe = 1  # Player is safe
+                    print("SAFE CHECK 1")
+                    break
+
+        # 2nd check - derive structure from playerSafe variable - build position board for all pieces.
+
+        possibleRetaliations = []
+        if playerSafe == 0:
+            # Get all pieces by checking in tempAttackingPieces - store coordinates - check if still in check
+            for i in range(len(tempBoard)):
+                for j in range(len(tempBoard[0])):
+                    if tempBoard[i][j] != '_' and tempBoard[i][j] not in tempAttackingPieces:
+                        possibleRetaliations.append((i, j))
+                        if boardCheck(tempBoard, i, j, attackerpos[0], attackerpos[1], tempPlayer, yourPieces) == 1:
+                            subBoard = copy.deepcopy(tempBoard)
+                            # validateAndMove(subBoard,i,j,attackerpos[0], attackerpos[1], tempPlayer,tempAttackingPieces)
+                            subBoard[i][j], subBoard[attackerpos[0]][attackerpos[1]] = "_", subBoard[i][j]
+                            a, b, c = checkKingSafe(subBoard, tempPlayer, tempAttackingPieces)
+                            if a == 0:
+                                playerSafe = 2
+                                break
+
+        # 3rd Check - Try intercept attacker
+        intermediatePositions = []
+        if playerSafe == 0 and tempBoard[attackerpos[0]][attackerpos[1]].lower() != 'k':
+            if attackerpos[0] < kingPos[0]:
+                if attackerpos[1] > kingPos[1]:
+                    yVal = attackerpos[1] - 1
+                    for m in range(attackerpos[0] + 1, kingPos[0]):
+                        intermediatePositions.append((m, yVal))
+                        yVal -= 1
+
+                elif attackerpos[1] == kingPos[1]:
+                    for m in range(attackerpos[0] + 1, kingPos[0]):
+                        intermediatePositions.append((m, kingPos[1]))
+
+                else:
+                    yVal = attackerpos[1] + 1
+                    for m in range(attackerpos[0] + 1, kingPos[0]):
+                        intermediatePositions.append((m, yVal))
+                        yVal += 1
+
+            elif attackerpos[0] > kingPos[0]:
+                if attackerpos[1] > kingPos[1]:
+                    yVal = kingPos[1] + 1
+                    for m in range(kingPos[0] + 1, attackerpos[0]):
+                        intermediatePositions.append((m, yVal))
+                        yVal += 1
+
+                elif attackerpos[1] == kingPos[1]:
+                    for m in range(kingPos[0] + 1, attackerpos[0]):
+                        intermediatePositions.append((m, kingPos[1]))
+
+                else:
+                    yVal = kingPos[1] - 1
+                    for m in range(kingPos[0] + 1, attackerpos[0]):
+                        intermediatePositions.append((m, yVal))
+                        yVal -= 1
+
+            else:
+                if kingPos[1] < attackerpos[1]:
+                    intermediatePositions[:] = [(kingPos[0], y) for y in range(kingPos[1] + 1, attackerpos[1])]
+                else:
+                    intermediatePositions[:] = [(kingPos[0], y) for y in range(attackerpos[1] + 1, kingPos[1])]
+
+            for ret in possibleRetaliations:
+                for pos in intermediatePositions:
+                    if boardCheck(tempBoard, ret[0], ret[1], pos[0], pos[1], tempPlayer, yourPieces) == 1:
+                        subBoard = copy.deepcopy(tempBoard)
+                        # validateAndMove(subBoard, ret[0], ret[1], pos[0], pos[1], tempPlayer, tempAttackingPieces)
+                        subBoard[ret[0]][ret[1]], subBoard[pos[0]][pos[1]] = "_", subBoard[ret[0]][ret[1]]
+                        a, b, c = checkKingSafe(subBoard, tempPlayer, tempAttackingPieces)
+                        if a == 0:
+                            playerSafe = 3
+                            break
+
+        print("***PLAYER SAFE: {}".format(playerSafe))
+
+        if playerSafe == 0:
+            game.PrintMessage("GAME OVER")
+            game.Draw(board)
+            print("**************GAME OVER**************")
+            time.sleep(30)
+            pygame.quit()
+            sys.exit(0)
 
 
 #############################################################################################################################################
