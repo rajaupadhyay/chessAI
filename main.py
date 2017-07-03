@@ -10,6 +10,7 @@ import time
 
 piecesDict = {"ROOK": "R", "KNIGHT": "K", "BISHOP": "B", "QUEEN": "Q", "KING": "KI", "PAWN": "P"}
 counter = 0
+preVal = -1
 board = []
 attackingPieces1 = ["KI","R","B","Q","K"]
 attackingPieces2 = ["ki","r","b","q","k"]
@@ -37,25 +38,29 @@ def initialise():
         print(i + 1, end=" ")
         print(board[i])
 
+
 replay = 0
 def play():
     game = gui.ChessGUI_pygame()
     while True:  # Implement while(boardCheck()) where boardCheck() checks if game has ended
         global counter
         global replay
-        global board
+        global board, preVal
         print(counter)
         occ = 0
         if counter % 2 == 0:
             print("PLAYER 1s TURN (WHITE)")
-            game.PrintMessage("BLACK TO PLAY") #Alternate
+            if counter != preVal:
+                game.PrintMessage("BLACK TO PLAY") #Alternate
             player = "WHITE"
             flag = 1
         else:
             print("PLAYER 2s TURN (BLACK)")
-            game.PrintMessage("WHITE TO PLAY")
+            if counter != preVal:
+                game.PrintMessage("WHITE TO PLAY")
             player = "BLACK"
             flag = 2
+        preVal = counter
 
         # GET USER INPUT - piece coordinates and the target coordinates - b7b5
         # stringVal = str(input())
@@ -103,7 +108,10 @@ def play():
             while val == 0:
                 checked, attacker, myKingPos = checkKingSafe(board,flag,attackingPieces2)
                 if checked == 1:
-                    piecePosx, piecePosy = myKingPos[0], myKingPos[1]
+                    possibleToPlay, pieces, target = getOutOfCheck(1)
+                    piecePosx, piecePosy = pieces[0], pieces[1]
+                    targetPosx, targetPosy = target[0], target[1]
+                    break
                 else:
                     piecePosx = random.randint(0,7)
                     pieceList = [piece for piece in attackingPieces1+["P"] if piece in board[piecePosx]]
@@ -141,7 +149,7 @@ def play():
                     print("CHECKVAL: {}".format(checkVal))
                     if checkVal == 1:
                         board = boardCopy
-                        # game.PrintMessage("INVALID (CHECKED) - {} TRY AGAIN".format(player))
+                        game.PrintMessage("INVALID (CHECKED) - {} TRY AGAIN".format(player))
                         print("CHECKED - PLAY TO PROTECT KING")
                         occ = 1
                         counter -= 1
@@ -180,7 +188,7 @@ def play():
             counter -= 1
 ###################################################################################################################################################
 
-        getOutOfCheck(flag)
+        q,w,e = getOutOfCheck(flag)
 
         # GAME OVER
 
@@ -271,10 +279,12 @@ def checkKingSafe(board1, playerNo, attackingPieces):
                 return 1, (KINGX+1,KINGY+2), (KINGX,KINGY)
 
 
+    # attackingPieces1 = ["KI", "R", "B", "Q", "K"]
+
     leftY = KINGY-1
     while leftY>=0:
         if board1[KINGX][leftY] != "_":
-            if board1[KINGX][leftY] in attackingPieces[:-1]:
+            if board1[KINGX][leftY] in [attackingPieces[1], attackingPieces[3]]:
                 return 1, (KINGX,leftY), (KINGX,KINGY)
             else:
                 break
@@ -283,7 +293,7 @@ def checkKingSafe(board1, playerNo, attackingPieces):
     rightY = KINGY+1
     while rightY<8:
         if board1[KINGX][rightY] != "_":
-            if board1[KINGX][rightY] in attackingPieces[:-1]:
+            if board1[KINGX][rightY] in [attackingPieces[1], attackingPieces[3]]:
                 return 1, (KINGX, rightY), (KINGX,KINGY)
             else:
                 break
@@ -292,7 +302,7 @@ def checkKingSafe(board1, playerNo, attackingPieces):
     topX = KINGX-1
     while topX>=0:
         if board1[topX][KINGY] != "_":
-            if board1[topX][KINGY] in attackingPieces[:-1]:
+            if board1[topX][KINGY] in [attackingPieces[1], attackingPieces[3]]:
                 return 1, (topX, KINGY), (KINGX, KINGY)
             else:
                 break
@@ -301,7 +311,7 @@ def checkKingSafe(board1, playerNo, attackingPieces):
     bottomX = KINGX+1
     while bottomX<8:
         if board1[bottomX][KINGY] != "_":
-            if board1[bottomX][KINGY] in attackingPieces[:-1]:
+            if board1[bottomX][KINGY] in [attackingPieces[1], attackingPieces[3]]:
                 return 1, (bottomX,KINGY), (KINGX, KINGY)
             else:
                 break
@@ -310,7 +320,7 @@ def checkKingSafe(board1, playerNo, attackingPieces):
     bottomLeftX, bottomLeftY = KINGX+1, KINGY-1
     while bottomLeftX<8 and bottomLeftY>=0:
         if board1[bottomLeftX][bottomLeftY] != "_":
-            if board1[bottomLeftX][bottomLeftY] in attackingPieces[:-1]:
+            if board1[bottomLeftX][bottomLeftY] in [attackingPieces[2], attackingPieces[3]]:
                 return 1, (bottomLeftX,bottomLeftY), (KINGX, KINGY)
             else:
                 break
@@ -320,7 +330,7 @@ def checkKingSafe(board1, playerNo, attackingPieces):
     bottomRightX, bottomRightY = KINGX+1,KINGY+1
     while bottomRightX<8 and bottomRightY<8:
         if board1[bottomRightX][bottomRightY] != "_":
-            if board1[bottomRightX][bottomRightY] in attackingPieces[:-1]:
+            if board1[bottomRightX][bottomRightY] in [attackingPieces[2], attackingPieces[3]]:
                 return 1, (bottomRightX, bottomRightY), (KINGX, KINGY)
             else:
                 break
@@ -330,7 +340,7 @@ def checkKingSafe(board1, playerNo, attackingPieces):
     topLeftX, topLeftY = KINGX-1,KINGY-1
     while topLeftX>=0 and topLeftY>=0:
         if board1[topLeftX][topLeftY] != "_":
-            if board1[topLeftX][topLeftY] in attackingPieces[:-1]:
+            if board1[topLeftX][topLeftY] in [attackingPieces[2], attackingPieces[3]]:
                 return 1, (topLeftX, topLeftY), (KINGX, KINGY)
             else:
                 break
@@ -340,7 +350,7 @@ def checkKingSafe(board1, playerNo, attackingPieces):
     topRightX, topRightY = KINGX-1, KINGY+1
     while topRightX>=0 and topRightY<8:
         if board1[topRightX][topRightY] != "_":
-            if board1[topRightX][topRightY] in attackingPieces[:-1]:
+            if board1[topRightX][topRightY] in [attackingPieces[2], attackingPieces[3]]:
                 return 1, (topRightX, topRightY), (KINGX, KINGY)
             else:
                 break
@@ -359,7 +369,7 @@ def boardCheck(board1,pieceX,pieceY,targetX,targetY,playerNo,attackingPieces):
             if board1[pieceX][pieceY] == 'p':
                 if targetY == pieceY:
                     if board1[pieceX + 1][pieceY] == '_':
-                        if pieceX == 1 and targetX == 3:
+                        if pieceX == 1 and targetX == 3 and board1[targetX][targetY] == "_":
                             return 1
                         elif targetX - pieceX == 1:
                             return 1
@@ -374,7 +384,7 @@ def boardCheck(board1,pieceX,pieceY,targetX,targetY,playerNo,attackingPieces):
             if board1[pieceX][pieceY] == 'P':
                 if targetY == pieceY:
                     if board1[pieceX - 1][pieceY] == '_':
-                        if pieceX == 6 and targetX == 4:
+                        if pieceX == 6 and targetX == 4 and board1[targetX][targetY] == "_":
                             return 1
                         elif targetX - pieceX == -1:
                             return 1
@@ -609,6 +619,7 @@ def moveGenerator(pieceX, pieceY, playerNo):
         return possibleMoves
 
 
+# Function for AI to get out of check
 def getOutOfCheck(flag):
     # use boardCheck to check if opponent can make a move (If player 1 then check if player 2 can still make a move else game over.)
     # checkKingSafe if valid move found
@@ -637,15 +648,17 @@ def getOutOfCheck(flag):
         tempPlayer = 2
         tempAttackingPieces = attackingPieces2
         yourPieces = attackingPieces1
+        yourPiecesP = yourPieces + ["P"]
     else:
         tempPlayer = 1
         tempAttackingPieces = attackingPieces1
         yourPieces = attackingPieces2
+        yourPiecesP = yourPieces+["p"]
 
     binVal1, q1, q2 = checkKingSafe(tempBoard, tempPlayer, tempAttackingPieces)
 
     if binVal1 == 1:
-
+        global playerSafe
         playerSafe = 0
 
         eightMoves = []
@@ -653,12 +666,14 @@ def getOutOfCheck(flag):
                            (kingPos[0] - 1, kingPos[1]), (kingPos[0] - 1, kingPos[1] + 1), (kingPos[0] + 1, kingPos[1]),
                            (kingPos[0] + 1, kingPos[1] - 1), (kingPos[0] + 1, kingPos[1] + 1)])
 
+
         print("YOUR PIECES: ", yourPieces)
-        eightMoves = [move for move in eightMoves if (0 <= move[0] < 8 and 0 <= move[1] < 8 and
-                                                      ((tempBoard[move[0]][move[1]].islower() and tempBoard[kingPos[0]][
-                                                          kingPos[1]].isupper()) or
-                                                       (tempBoard[move[0]][move[1]].isupper() and tempBoard[kingPos[0]][
-                                                           kingPos[1]].islower())))]
+        eightMoves = [move for move in eightMoves if (0 <= move[0] < 8 and 0 <= move[1] < 8)]
+        eightMoves = [move for move in eightMoves if tempBoard[move[0]][move[1]] not in yourPiecesP]
+        # ((tempBoard[move[0]][move[1]].islower() and tempBoard[kingPos[0]][
+        #     kingPos[1]].isupper()) or
+        #  (tempBoard[move[0]][move[1]].isupper() and tempBoard[kingPos[0]][
+        #      kingPos[1]].islower()))
         print("THE MOVES:", eightMoves)
         for move in eightMoves:
             print("MOVE:", move)
@@ -672,7 +687,7 @@ def getOutOfCheck(flag):
                 if a == 0:
                     playerSafe = 1  # Player is safe
                     print("SAFE CHECK 1")
-                    break
+                    return 1, (kingPos[0],kingPos[1]), (move[0],move[1])
 
         # 2nd check - derive structure from playerSafe variable - build position board for all pieces.
 
@@ -690,7 +705,8 @@ def getOutOfCheck(flag):
                             a, b, c = checkKingSafe(subBoard, tempPlayer, tempAttackingPieces)
                             if a == 0:
                                 playerSafe = 2
-                                break
+                                return 1, (i,j), (attackerpos[0], attackerpos[1])
+
 
         # 3rd Check - Try intercept attacker
         intermediatePositions = []
@@ -744,7 +760,7 @@ def getOutOfCheck(flag):
                         a, b, c = checkKingSafe(subBoard, tempPlayer, tempAttackingPieces)
                         if a == 0:
                             playerSafe = 3
-                            break
+                            return 1, (ret[0], ret[1]), (pos[0], pos[1])
 
         print("***PLAYER SAFE: {}".format(playerSafe))
 
@@ -755,6 +771,9 @@ def getOutOfCheck(flag):
             time.sleep(30)
             pygame.quit()
             sys.exit(0)
+    else:
+        return -1, (-1,-1), (-1,-1)
+
 
 
 #############################################################################################################################################
