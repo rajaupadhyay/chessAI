@@ -3,7 +3,6 @@ import gui
 import pygame
 from pygame.locals import *
 import math
-import os
 import copy
 import random
 import time
