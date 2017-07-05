@@ -776,6 +776,58 @@ def getOutOfCheck(flag):
 
 
 #############################################################################################################################################
+
+# AI Related Functions (Initial implementation of AI through minimax algo with alpha beta pruning)
+
+def makeMove(board, attackingPieces):
+    possibleBoardsList = []
+    possibleMovesList = []
+    bestPossibleMove = [] #[(),()]
+    bestPossibleScore = 0
+    DEPTH = 1 # MAX TRAVERSAL DEPTH OF TREE - set to 1 for testing purposes
+
+    for i in range(len(board)):
+        for j in range(len(board[0])):
+            if board[i][j] != "_" and board[i][j].isupper():
+                tempPossibleMoves = [move for move in moveGenerator(i,j,2) if boardCheck(board,i,j,move[0],move[1],2,attackingPieces) == 1]
+                if tempPossibleMoves:
+                    for move in tempPossibleMoves:
+                        subBoard = copy.deepcopy(board)
+                        subBoard[i][j], subBoard[move[0]][move[1]] = "_", subBoard[i][j]
+                        checkVal, attackerPos, kingPos = checkKingSafe(subBoard,2,attackingPieces)
+                        if checkVal == 0:
+                            possibleBoardsList.append(subBoard)
+                            possibleMovesList.append([i,j,move[0],move[1]])
+
+    bestPossibleMove = possibleMovesList[0]
+    bestPossibleScore = evaluatePos(possibleBoardsList[0], -sys.maxsize, sys.maxsize, DEPTH, 1)
+
+    # Call evaluatePos on each board config possible and if score is higher then reset the highestPossible Score
+    for i in range(len(possibleBoardsList)):
+        tempScore = evaluatePos(possibleBoardsList[i],-sys.maxsize,sys.maxsize,DEPTH,1)
+        if tempScore >= bestPossibleScore:
+            bestPossibleMove = possibleMovesList[i]
+            bestPossibleScore = tempScore
+
+    return bestPossibleMove
+
+
+
+
+
+def evaluatePos(board, alpha, beta, depth, playerNo):
+    pass
+
+
+
+
+def evaluationFunction(board):
+    pass
+
+
+
+
+#############################################################################################################################################
 if __name__ == "__main__":
     game = gui.ChessGUI_pygame()
     testBoard = [['r', 'k', 'b', 'q', 'ki', 'b', 'k', 'r'],
