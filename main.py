@@ -789,7 +789,7 @@ def makeMove(board):
     possibleMovesList = []
     bestPossibleMove = [] #[(),()]
     bestPossibleScore = 0
-    DEPTH = 2 # MAX TRAVERSAL DEPTH OF TREE - set to 1 for testing purposes
+    DEPTH = 1 # MAX TRAVERSAL DEPTH OF TREE - set to 1 for testing purposes
     print("TESTING 44:", boardCheck(board,7,1,6,3,2,attackingPieces1))
     print("testing 45:", boardCheck(board,7,7,0,7,2,attackingPieces1))
     for i in range(len(board)):
