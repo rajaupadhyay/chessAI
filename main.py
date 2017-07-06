@@ -816,13 +816,58 @@ def makeMove(board, attackingPieces):
 
 
 def evaluatePos(board, alpha, beta, depth, playerNo):
-    pass
+    if depth == 0:
+        evaluation = evaluationFunction(board)
+        return evaluation
 
+    if playerNo == 1:
+        moves = []
+        for i in range(len(board)):
+            for j in range(len(board[0])):
+                if board[i][j] != "_" and board[i][j].islower():
+                    tempPossibleMoves = [(i,j) + move for move in moveGenerator(i, j, 1) if
+                                         boardCheck(board, i, j, move[0], move[1], 1, attackingPieces1) == 1]
+                    if tempPossibleMoves:
+                        moves.extend(tempPossibleMoves)
 
+        tempBeta = beta
+        for move in moves:
+            subBoard = copy.deepcopy(board)
+            subBoard[move[0]][move[1]], subBoard[move[2]][move[3]] = "_", subBoard[move[0]][move[1]]
+            checkVal, attackerPos, kingPos = checkKingSafe(subBoard, 1, attackingPieces1)
+            if checkVal == 0:
+                tempBeta = min(tempBeta, evaluatePos(subBoard, alpha, beta, depth-1, 2))
+                if tempBeta <= alpha:
+                    break
+        return tempBeta
+
+    else:
+        moves = []
+        for i in range(len(board)):
+            for j in range(len(board[0])):
+                if board[i][j] != "_" and board[i][j].isupper():
+                    tempPossibleMoves = [(i, j) + move for move in moveGenerator(i, j, 2) if
+                                         boardCheck(board, i, j, move[0], move[1], 2, attackingPieces2) == 1]
+                    if tempPossibleMoves:
+                        moves.extend(tempPossibleMoves)
+
+        tempAlpha = alpha
+        for move in moves:
+            subBoard = copy.deepcopy(board)
+            subBoard[move[0]][move[1]], subBoard[move[2]][move[3]] = "_", subBoard[move[0]][move[1]]
+            checkVal, attackerPos, kingPos = checkKingSafe(subBoard, 2, attackingPieces2)
+            if checkVal == 0:
+                tempAlpha = max(tempAlpha, evaluatePos(subBoard, alpha, beta, depth - 1, 1))
+                if tempAlpha >= beta:
+                    break
+        return tempAlpha
 
 
 def evaluationFunction(board):
-    pass
+    whiteScore = 0
+    blackScore = 0
+
+
 
 
 
