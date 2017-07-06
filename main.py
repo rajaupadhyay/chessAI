@@ -112,20 +112,25 @@ def play():
                     targetPosx, targetPosy = target[0], target[1]
                     break
                 else:
-                    piecePosx = random.randint(0,7)
-                    pieceList = [piece for piece in attackingPieces1+["P"] if piece in board[piecePosx]]
-                    if pieceList:
-                        piecePosy = board[piecePosx].index(pieceList[random.randint(0,len(pieceList)-1)])
+                    piecePosx, piecePosy, targetPosx, targetPosy = makeMove(board)
+                    print("AI MOVES: {}{} to {}{}".format(piecePosx,piecePosy,targetPosx,targetPosy))
+                    val = 1
 
-                targetList = moveGenerator(piecePosx, piecePosy, flag)
-                print("TARGETS:", targetList)
-                if targetList:
-                    randMove = targetList[random.randint(0,len(targetList)-1)]
-                    print(randMove)
-                    if board[randMove[0]][randMove[1]].islower() or board[randMove[0]][randMove[1]] == '_':
-                        targetPosx = randMove[0]
-                        targetPosy = randMove[1]
-                        val = 1
+
+                #     piecePosx = random.randint(0,7)
+                #     pieceList = [piece for piece in attackingPieces1+["P"] if piece in board[piecePosx]]
+                #     if pieceList:
+                #         piecePosy = board[piecePosx].index(pieceList[random.randint(0,len(pieceList)-1)])
+                #
+                # targetList = moveGenerator(piecePosx, piecePosy, flag)
+                # print("TARGETS:", targetList)
+                # if targetList:
+                #     randMove = targetList[random.randint(0,len(targetList)-1)]
+                #     print(randMove)
+                #     if board[randMove[0]][randMove[1]].islower() or board[randMove[0]][randMove[1]] == '_':
+                #         targetPosx = randMove[0]
+                #         targetPosy = randMove[1]
+                #         val = 1
 
 
 
@@ -215,18 +220,18 @@ def checkKingSafe(board1, playerNo, attackingPieces):
     for i in range(8):
         if tempKing in board1[i]:
             KINGX, KINGY = i, board1[i].index(tempKing)
-    print(KINGX,KINGY)
+    # print(KINGX,KINGY)
 
     if init == 0:
         if playerNo == 1:
             if KINGX + 1 < 8:
                 if KINGY - 1 >= 0:
                     if board1[KINGX+1][KINGY-1] == 'P':
-                        print('here1')
+                        # print('here1')
                         return 1, (KINGX+1,KINGY-1), (KINGX,KINGY)
                 if KINGY + 1 < 8:
                     if board1[KINGX+1][KINGY+1] == 'P':
-                        print('here2')
+                        # print('here2')
                         return 1, (KINGX+1,KINGY+1), (KINGX,KINGY)
         else:
             if KINGX - 1 >= 0:
@@ -361,9 +366,9 @@ def checkKingSafe(board1, playerNo, attackingPieces):
 
 
 # Function validates move
-def boardCheck(board1,pieceX,pieceY,targetX,targetY,playerNo,attackingPieces):
+def boardCheck(board1,pieceX,pieceY,targetX,targetY,playerNo,yourPieces):
     if board1[pieceX][pieceY] == 'p' or board1[pieceX][pieceY] == 'P':
-        print("000")
+        # print("000")
         if playerNo == 1:
             if board1[pieceX][pieceY] == 'p':
                 if targetY == pieceY:
@@ -394,8 +399,8 @@ def boardCheck(board1,pieceX,pieceY,targetX,targetY,playerNo,attackingPieces):
                     if board1[targetX][targetY].islower():
                         return 1
 
-    elif board1[pieceX][pieceY] == attackingPieces[0]:
-        print("101")
+    elif board1[pieceX][pieceY] == yourPieces[0]:
+        # print("101")
         if targetY == pieceY or targetY == pieceY - 1 or targetY == pieceY + 1:
             if pieceX - targetX == 1:
                 return 1
@@ -408,92 +413,92 @@ def boardCheck(board1,pieceX,pieceY,targetX,targetY,playerNo,attackingPieces):
         else:
             return 0
 
-    elif board1[pieceX][pieceY] == attackingPieces[1]:
-        print("202")
+    elif board1[pieceX][pieceY] == yourPieces[1]:
+        # print("202")
         if targetX == pieceX:
             if targetY - pieceY >= 0:
                 for i in range(abs(targetY - pieceY) - 1):
                     if board1[pieceX][pieceY + i + 1] != '_':
-                        print("INVALID MOVE")
+                        # print("INVALID MOVE")
                         return 0
                 return 1
             else:
                 for i in range(abs(targetY - pieceY) - 1):
                     if board1[targetX][targetY + i + 1] != '_':
-                        print("INVALID MOVE")
+                        # print("INVALID MOVE")
                         return 0
                 return 1
         elif targetY == pieceY:
             if targetX - pieceX >= 0:
                 for i in range(abs(targetX - pieceX) - 1):
                     if board1[pieceX + i + 1][pieceY] != '_':
-                        print("INVALID MOVE")
+                        # print("INVALID MOVE")
                         return 0
                 return 1
             else:
                 for i in range(abs(targetX - pieceX) - 1):
                     if board[targetX + i + 1][targetY] != '_':
-                        print("INVALID MOVE")
+                        # print("INVALID MOVE")
                         return 0
                 return 1
 
-    elif board1[pieceX][pieceY] == attackingPieces[2] or board1[pieceX][pieceY] == attackingPieces[3]:
-        print("303")
+    elif board1[pieceX][pieceY] == yourPieces[2] or board1[pieceX][pieceY] == yourPieces[3]:
+        # print("303")
         buffer = board1[pieceX][pieceY]
         if abs(pieceX - targetX) == abs(pieceY - targetY):
-            print(pieceX, targetX)
+            # print(pieceX, targetX)
             if targetX < pieceX:
                 if targetY < pieceY:
                     for x in range(pieceX - targetX - 1):
                         if board1[pieceX - x - 1][pieceY - x - 1] != '_':
-                            print("INVALID MOVE")
+                            # print("INVALID MOVE")
                             return 0
                     return 1
                 else:
                     for x in range(pieceX - targetX - 1):
                         if board1[pieceX - x - 1][pieceY + x + 1] != '_':
-                            print("INVALID MOVE")
+                            # print("INVALID MOVE")
                             return 0
                     return 1
             else:
                 if targetY < pieceY:
                     for x in range(targetX - pieceX - 1):
                         if board1[pieceX + x + 1][pieceY - x - 1] != '_':
-                            print("INVALID MOVE")
+                            # print("INVALID MOVE")
                             return 0
                     return 1
                 else:
                     for x in range(targetX - pieceX - 1):
                         if board1[pieceX + x + 1][pieceY + x + 1] != '_':
-                            print("INVALID MOVE")
+                            # print("INVALID MOVE")
                             return 0
                     return 1
         else:
-            if board1[pieceX][pieceY] == attackingPieces[3]:
+            if board1[pieceX][pieceY] == yourPieces[3]:
                 if targetX == pieceX:
                     if targetY - pieceY >= 0:
                         for i in range(abs(targetY - pieceY) - 1):
                             if board1[pieceX][pieceY + i + 1] != '_':
-                                print("INVALID MOVE")
+                                # print("INVALID MOVE")
                                 return 0
                         return 1
                     else:
                         for i in range(abs(targetY - pieceY) - 1):
                             if board1[targetX][targetY + i + 1] != '_':
-                                print("INVALID MOVE")
+                                # print("INVALID MOVE")
                                 return 0
                         return 1
                 elif targetY == pieceY:
                     if targetX - pieceX >= 0:
                         for i in range(abs(targetX - pieceX) - 1):
                             if board1[pieceX + i + 1][pieceY] != '_':
-                                print("INVALID MOVE")
+                                # print("INVALID MOVE")
                                 return 0
                         return 1
                     else:
                         for i in range(abs(targetX - pieceX) - 1):
                             if board1[targetX + i + 1][targetY] != '_':
-                                print("INVALID MOVE")
+                                # print("INVALID MOVE")
                                 return 0
                         return 1
                 else:
@@ -501,8 +506,8 @@ def boardCheck(board1,pieceX,pieceY,targetX,targetY,playerNo,attackingPieces):
             else:
                 return 0
 
-    elif board1[pieceX][pieceY] == attackingPieces[4]:
-        print("404")
+    elif board1[pieceX][pieceY] == yourPieces[4]:
+        # print("404")
         if (targetY == pieceY - 1 or targetY == pieceY + 1) and (targetX == pieceX - 2 or targetX == pieceX + 2):
             return 1
         elif (targetY == pieceY - 2 or targetY == pieceY + 2) and (targetX == pieceX - 1 or targetX == pieceX + 1):
@@ -779,36 +784,46 @@ def getOutOfCheck(flag):
 
 # AI Related Functions (Initial implementation of AI through minimax algo with alpha beta pruning)
 
-def makeMove(board, attackingPieces):
+def makeMove(board):
     possibleBoardsList = []
     possibleMovesList = []
     bestPossibleMove = [] #[(),()]
     bestPossibleScore = 0
-    DEPTH = 1 # MAX TRAVERSAL DEPTH OF TREE - set to 1 for testing purposes
-
+    DEPTH = 2 # MAX TRAVERSAL DEPTH OF TREE - set to 1 for testing purposes
+    print("TESTING 44:", boardCheck(board,7,1,6,3,2,attackingPieces1))
+    print("testing 45:", boardCheck(board,7,7,0,7,2,attackingPieces1))
     for i in range(len(board)):
         for j in range(len(board[0])):
             if board[i][j] != "_" and board[i][j].isupper():
-                tempPossibleMoves = [move for move in moveGenerator(i,j,2) if boardCheck(board,i,j,move[0],move[1],2,attackingPieces) == 1]
-                if tempPossibleMoves:
-                    for move in tempPossibleMoves:
-                        subBoard = copy.deepcopy(board)
-                        subBoard[i][j], subBoard[move[0]][move[1]] = "_", subBoard[i][j]
-                        checkVal, attackerPos, kingPos = checkKingSafe(subBoard,2,attackingPieces)
-                        if checkVal == 0:
-                            possibleBoardsList.append(subBoard)
-                            possibleMovesList.append([i,j,move[0],move[1]])
-
+                print("check 45")
+                storeMoves = moveGenerator(i,j,2)
+                # print("STORE MOVES", i,j, storeMoves)
+                if storeMoves:
+                    tempPossibleMoves = [move for move in storeMoves if boardCheck(board,i,j,move[0],move[1],2,attackingPieces1) == 1
+                                         and (board[move[0]][move[1]] == "_" or board[move[0]][move[1]].islower())]
+                    print(i,j, tempPossibleMoves)
+                    if tempPossibleMoves:
+                        for move in tempPossibleMoves:
+                            subBoard = copy.deepcopy(board)
+                            subBoard[i][j], subBoard[move[0]][move[1]] = "_", subBoard[i][j]
+                            checkVal, attackerPos, kingPos = checkKingSafe(subBoard,2,attackingPieces2)
+                            if checkVal == 0:
+                                possibleBoardsList.append(subBoard)
+                                possibleMovesList.append([i,j,move[0],move[1]])
+    print("check 47")
+    # print("BOARDS:",possibleBoardsList)
+    # print("MOVES:",possibleMovesList)
     bestPossibleMove = possibleMovesList[0]
     bestPossibleScore = evaluatePos(possibleBoardsList[0], -sys.maxsize, sys.maxsize, DEPTH, 1)
-
+    print("check 48")
     # Call evaluatePos on each board config possible and if score is higher then reset the highestPossible Score
     for i in range(len(possibleBoardsList)):
         tempScore = evaluatePos(possibleBoardsList[i],-sys.maxsize,sys.maxsize,DEPTH,1)
         if tempScore >= bestPossibleScore:
             bestPossibleMove = possibleMovesList[i]
             bestPossibleScore = tempScore
-
+        print("PROCESSING {} out of possible {} results".format(i,len(possibleBoardsList)))
+    print("BEST MOVE:", bestPossibleMove)
     return bestPossibleMove
 
 
@@ -818,6 +833,7 @@ def makeMove(board, attackingPieces):
 def evaluatePos(board, alpha, beta, depth, playerNo):
     if depth == 0:
         evaluation = evaluationFunction(board)
+        # print("EVAL:", evaluation)
         return evaluation
 
     if playerNo == 1:
@@ -825,10 +841,13 @@ def evaluatePos(board, alpha, beta, depth, playerNo):
         for i in range(len(board)):
             for j in range(len(board[0])):
                 if board[i][j] != "_" and board[i][j].islower():
-                    tempPossibleMoves = [(i,j) + move for move in moveGenerator(i, j, 1) if
-                                         boardCheck(board, i, j, move[0], move[1], 1, attackingPieces1) == 1]
-                    if tempPossibleMoves:
-                        moves.extend(tempPossibleMoves)
+                    storeMoves = moveGenerator(i, j, 1)
+                    if storeMoves:
+                        tempPossibleMoves = [(i,j) + move for move in storeMoves if
+                                             boardCheck(board, i, j, move[0], move[1], 1, attackingPieces2) == 1 and
+                                             (board[move[0]][move[1]] == "_" or board[move[0]][move[1]].isupper())]
+                        if tempPossibleMoves:
+                            moves.extend(tempPossibleMoves)
 
         tempBeta = beta
         for move in moves:
@@ -846,10 +865,14 @@ def evaluatePos(board, alpha, beta, depth, playerNo):
         for i in range(len(board)):
             for j in range(len(board[0])):
                 if board[i][j] != "_" and board[i][j].isupper():
-                    tempPossibleMoves = [(i, j) + move for move in moveGenerator(i, j, 2) if
-                                         boardCheck(board, i, j, move[0], move[1], 2, attackingPieces2) == 1]
-                    if tempPossibleMoves:
-                        moves.extend(tempPossibleMoves)
+                    storeMoves = moveGenerator(i, j, 2)
+                    if storeMoves:
+                        tempPossibleMoves = [(i, j) + move for move in storeMoves if
+                                             boardCheck(board, i, j, move[0], move[1], 2, attackingPieces1) == 1 and
+                                             (board[move[0]][move[1]] == "_" or board[move[0]][move[1]].islower())]
+                        # print("temp Moves",tempPossibleMoves)
+                        if tempPossibleMoves:
+                            moves.extend(tempPossibleMoves)
 
         tempAlpha = alpha
         for move in moves:
@@ -867,8 +890,40 @@ def evaluationFunction(board):
     whiteScore = 0
     blackScore = 0
 
+    checkVal1, attackerPos1, kingPos1 = checkKingSafe(board,1,attackingPieces1)
+    checkVal2, attackerPos2, kingPos2 = checkKingSafe(board,2, attackingPieces2)
+    if checkVal1 == 1:
+        whiteScore = -10000
+    if checkVal2 == 1:
+        blackScore = -10000
 
+    for i in range(len(board)):
+        for j in range(len(board[0])):
+            if board[i][j] != "_":
+                if board[i][j].islower():
+                    if board[i][j] == "q":
+                        whiteScore += 9
+                    elif board[i][j] == "r":
+                        whiteScore += 5
+                    elif board[i][j] == "k" or board[i][j] == "b":
+                        whiteScore += 3
+                    elif board[i][j] == "p":
+                        whiteScore += 1
+                    elif board[i][j] == "ki":
+                        whiteScore += 10000
+                else:
+                    if board[i][j] == "Q":
+                        blackScore += 9
+                    elif board[i][j] == "R":
+                        blackScore += 5
+                    elif board[i][j] == "K" or board[i][j] == "B":
+                        blackScore += 3
+                    elif board[i][j] == "P":
+                        blackScore += 1
+                    elif board[i][j] == "KI":
+                        blackScore += 10000
 
+    return blackScore-whiteScore
 
 
 
