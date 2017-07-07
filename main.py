@@ -6,6 +6,7 @@ import math
 import copy
 import random
 import time
+from pieceSquareTables import *
 
 piecesDict = {"ROOK": "R", "KNIGHT": "K", "BISHOP": "B", "QUEEN": "Q", "KING": "KI", "PAWN": "P"}
 counter = 0
@@ -13,7 +14,6 @@ preVal = -1
 board = []
 attackingPieces1 = ["KI","R","B","Q","K"]
 attackingPieces2 = ["ki","r","b","q","k"]
-
 # WHITE PIECES ARE LOWERCASE AND BLACK PIECES ARE UPPERCASE
 def initialise():
     row8 = [piecesDict["ROOK"].lower(), piecesDict["KNIGHT"].lower(), piecesDict["BISHOP"].lower(),
@@ -112,25 +112,27 @@ def play():
                     targetPosx, targetPosy = target[0], target[1]
                     break
                 else:
-                    piecePosx, piecePosy, targetPosx, targetPosy = makeMove(board)
-                    print("AI MOVES: {}{} to {}{}".format(piecePosx,piecePosy,targetPosx,targetPosy))
-                    val = 1
+                    if counter > 2:
+                        piecePosx, piecePosy, targetPosx, targetPosy = makeMove(board)
+                        print("AI MOVES: {}{} to {}{}".format(piecePosx,piecePosy,targetPosx,targetPosy))
+                        val = 1
+                    else:
+                        piecePosx = random.randint(0,7)
+                        print("X",piecePosx)
+                        pieceList = [j for j in range(0,8) if board[piecePosx][j]!="_" and board[piecePosx][j].isupper()]
+                        print("PIECE LIST:",pieceList)
+                        if pieceList:
+                            piecePosy = pieceList[random.randint(0,len(pieceList))]
 
-
-                #     piecePosx = random.randint(0,7)
-                #     pieceList = [piece for piece in attackingPieces1+["P"] if piece in board[piecePosx]]
-                #     if pieceList:
-                #         piecePosy = board[piecePosx].index(pieceList[random.randint(0,len(pieceList)-1)])
-                #
-                # targetList = moveGenerator(piecePosx, piecePosy, flag)
-                # print("TARGETS:", targetList)
-                # if targetList:
-                #     randMove = targetList[random.randint(0,len(targetList)-1)]
-                #     print(randMove)
-                #     if board[randMove[0]][randMove[1]].islower() or board[randMove[0]][randMove[1]] == '_':
-                #         targetPosx = randMove[0]
-                #         targetPosy = randMove[1]
-                #         val = 1
+                        targetList = moveGenerator(piecePosx, piecePosy, flag)
+                        print("TARGETS:", targetList)
+                        if targetList:
+                            randMove = targetList[random.randint(0,len(targetList)-1)]
+                            print(randMove)
+                            if board[randMove[0]][randMove[1]].islower() or board[randMove[0]][randMove[1]] == '_':
+                                targetPosx = randMove[0]
+                                targetPosy = randMove[1]
+                                val = 1
 
 
 
@@ -789,7 +791,7 @@ def makeMove(board):
     possibleMovesList = []
     bestPossibleMove = [] #[(),()]
     bestPossibleScore = 0
-    DEPTH = 1 # MAX TRAVERSAL DEPTH OF TREE - set to 1 for testing purposes
+    DEPTH = 2 # MAX TRAVERSAL DEPTH OF TREE - set to 1 for testing purposes
     print("TESTING 44:", boardCheck(board,7,1,6,3,2,attackingPieces1))
     print("testing 45:", boardCheck(board,7,7,0,7,2,attackingPieces1))
     for i in range(len(board)):
@@ -903,25 +905,42 @@ def evaluationFunction(board):
                 if board[i][j].islower():
                     if board[i][j] == "q":
                         whiteScore += 9
+                        whiteScore += WhiteQueenSquareTableFinal[i][j]
                     elif board[i][j] == "r":
                         whiteScore += 5
-                    elif board[i][j] == "k" or board[i][j] == "b":
+                        whiteScore += WhiteRookSquareTableFinal[i][j]
+                    elif board[i][j] == "k":
                         whiteScore += 3
+                        whiteScore += WhiteKnightSquareTableFinal[i][j]
+                    elif board[i][j] == "b":
+                        whiteScore += 3
+                        whiteScore += WhiteBishopSquareTableFinal[i][j]
                     elif board[i][j] == "p":
                         whiteScore += 1
+                        whiteScore += WhitePawnSquareTableFinal[i][j]
                     elif board[i][j] == "ki":
                         whiteScore += 10000
                 else:
                     if board[i][j] == "Q":
                         blackScore += 9
+                        blackScore += BlackQueenSquareTableFinal[i][j]
                     elif board[i][j] == "R":
                         blackScore += 5
-                    elif board[i][j] == "K" or board[i][j] == "B":
+                        blackScore += BlackRookSquareTableFinal[i][j]
+                    elif board[i][j] == "K":
                         blackScore += 3
+                        blackScore += BlackKnightSquareTableFinal[i][j]
+                    elif board[i][j] == "B":
+                        blackScore += 3
+                        blackScore += BlackBishopSquareTableFinal[i][j]
                     elif board[i][j] == "P":
                         blackScore += 1
+                        blackScore += BlackPawnSquareTableFinal[i][j]
                     elif board[i][j] == "KI":
                         blackScore += 10000
+
+    # print("BLACK SCORE:", blackScore)
+    # print("WHITE SCORE:", whiteScore)
 
     return blackScore-whiteScore
 
