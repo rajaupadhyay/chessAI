@@ -122,7 +122,7 @@ def play():
                         pieceList = [j for j in range(0,8) if board[piecePosx][j]!="_" and board[piecePosx][j].isupper()]
                         print("PIECE LIST:",pieceList)
                         if pieceList:
-                            piecePosy = pieceList[random.randint(0,len(pieceList))]
+                            piecePosy = pieceList[random.randint(0,len(pieceList)-1)]
 
                         targetList = moveGenerator(piecePosx, piecePosy, flag)
                         print("TARGETS:", targetList)
