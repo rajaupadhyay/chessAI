@@ -681,6 +681,7 @@ def getOutOfCheck(flag):
         #  (tempBoard[move[0]][move[1]].isupper() and tempBoard[kingPos[0]][
         #      kingPos[1]].islower()))
         print("THE MOVES:", eightMoves)
+
         for move in eightMoves:
             print("MOVE:", move)
             if boardCheck(tempBoard, kingPos[0], kingPos[1], move[0], move[1], tempPlayer, yourPieces) == 1:
