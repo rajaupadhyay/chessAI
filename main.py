@@ -102,7 +102,7 @@ def play():
                 if e.type is QUIT:  # the "x" kill button
                     pygame.quit()
                     sys.exit(0)
-        else: # Random AI
+        else: # AI Player (MM with Alpha Beta Pruning of set depth of 2)
             val = 0
             while val == 0:
                 checked, attacker, myKingPos = checkKingSafe(board,flag,attackingPieces2)
