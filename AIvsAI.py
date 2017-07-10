@@ -69,40 +69,39 @@ def play():
         # targetPosx = int(stringVal[3]) - 1
 
         if flag == 1:
-            x=0
-            while x == 0:
-                pygame.event.set_blocked(MOUSEMOTION)
-                e = pygame.event.wait()
-                if e.type is MOUSEBUTTONDOWN:
-                    (mouseX, mouseY) = pygame.mouse.get_pos()
-                    piecePosx, piecePosy = game.GetClickedSquare(mouseX, mouseY)
-                    piecePosx, piecePosy = math.floor(piecePosx), math.floor(piecePosy)
-                    if piecePosx == -1 and piecePosy == -1:
-                        print("ERROR1")
-                        game.PrintMessage("INVALID - {} TRY AGAIN".format(player))
-                        counter -= 1
-                    x = 1
-                if e.type is QUIT:  # the "x" kill button
-                    pygame.quit()
-                    sys.exit(0)
+            val = 0
+            while val == 0:
+                checked, attacker, myKingPos = checkKingSafe(board, flag, attackingPieces1)
+                if checked == 1:
+                    possibleToPlay, pieces, target = getOutOfCheck(2)
+                    piecePosx, piecePosy = pieces[0], pieces[1]
+                    targetPosx, targetPosy = target[0], target[1]
+                    break
+                else:
+                    if counter >= 2:
+                        piecePosx, piecePosy, targetPosx, targetPosy = makeMoveWhite(board)
+                        print("AI MOVES: {}{} to {}{}".format(piecePosx, piecePosy, targetPosx, targetPosy))
+                        val = 1
+                    else:
+                        piecePosx = random.randint(0, 7)
+                        print("X", piecePosx)
+                        pieceList = [j for j in range(0, 8) if
+                                     board[piecePosx][j] != "_" and board[piecePosx][j].islower()]
+                        print("PIECE LIST:", pieceList)
+                        if pieceList:
+                            piecePosy = pieceList[random.randint(0, len(pieceList) - 1)]
 
-            x = 0
-            while x == 0:
-                pygame.event.set_blocked(MOUSEMOTION)
-                e = pygame.event.wait()
-                if e.type is MOUSEBUTTONDOWN:
-                    (mouseX, mouseY) = pygame.mouse.get_pos()
-                    targetPosx, targetPosy = game.GetClickedSquare(mouseX, mouseY)
-                    targetPosx, targetPosy = math.floor(targetPosx), math.floor(targetPosy)
-                    if targetPosx == -1 and targetPosy == -1:
-                        print("ERROR2")
-                        game.PrintMessage("INVALID - {} TRY AGAIN".format(player))
-                        counter -= 1
-                    x = 1
-                if e.type is QUIT:  # the "x" kill button
-                    pygame.quit()
-                    sys.exit(0)
-        else: # AI Player (MM with Alpha Beta Pruning of set depth of 2)
+                            targetList = moveGenerator(piecePosx, piecePosy, flag)
+                            print("TARGETS:", targetList)
+                            if targetList:
+                                randMove = targetList[random.randint(0, len(targetList) - 1)]
+                                print(randMove)
+                                if board[randMove[0]][randMove[1]].isupper() or board[randMove[0]][randMove[1]] == '_':
+                                    targetPosx = randMove[0]
+                                    targetPosy = randMove[1]
+                                    val = 1
+
+        else: # Random AI
             val = 0
             while val == 0:
                 checked, attacker, myKingPos = checkKingSafe(board,flag,attackingPieces2)
@@ -112,7 +111,7 @@ def play():
                     targetPosx, targetPosy = target[0], target[1]
                     break
                 else:
-                    if counter > 2:
+                    if counter >= 2:
                         piecePosx, piecePosy, targetPosx, targetPosy = makeMove(board)
                         print("AI MOVES: {}{} to {}{}".format(piecePosx,piecePosy,targetPosx,targetPosy))
                         val = 1
@@ -134,6 +133,8 @@ def play():
                                 targetPosy = randMove[1]
                                 val = 1
 
+        # time.sleep(30)
+
 
 
         buffer = board[targetPosx][targetPosy]
@@ -144,7 +145,7 @@ def play():
                 # Logic for moving to target pos (new func)
                 if board[targetPosx][targetPosy].islower() and board[targetPosx][targetPosy] != '_':
                     print("CAN NOT MOVE PIECE TO SPECIFIED COORDINATES (PREOCCUPIED BY YOUR PIECE)")
-                    game.PrintMessage("INVALID - {} TRY AGAIN".format(player))
+                    # game.PrintMessage("INVALID - {} TRY AGAIN".format(player))
                     occ = 1
                     counter -= 1
                 else:
@@ -155,7 +156,7 @@ def play():
                     print("CHECKVAL: {}".format(checkVal))
                     if checkVal == 1:
                         board = boardCopy
-                        game.PrintMessage("INVALID (CHECKED) - {} TRY AGAIN".format(player))
+                        # game.PrintMessage("INVALID (CHECKED) - {} TRY AGAIN".format(player))
                         print("CHECKED - PLAY TO PROTECT KING")
                         occ = 1
                         counter -= 1
@@ -189,8 +190,8 @@ def play():
             print("NO PIECE PRESENT AT THE POSITION SPECIFIED")
 
         if board[targetPosx][targetPosy] == buffer and occ == 0:
-            if flag == 1:
-                game.PrintMessage("INVALID - {} TRY AGAIN".format(player))
+            # if flag == 1:
+                # game.PrintMessage("INVALID - {} TRY AGAIN".format(player))
             counter -= 1
 ###################################################################################################################################################
 
@@ -681,7 +682,6 @@ def getOutOfCheck(flag):
         #  (tempBoard[move[0]][move[1]].isupper() and tempBoard[kingPos[0]][
         #      kingPos[1]].islower()))
         print("THE MOVES:", eightMoves)
-
         for move in eightMoves:
             print("MOVE:", move)
             if boardCheck(tempBoard, kingPos[0], kingPos[1], move[0], move[1], tempPlayer, yourPieces) == 1:
@@ -945,6 +945,174 @@ def evaluationFunction(board):
 
     return blackScore-whiteScore
 
+
+
+
+
+
+
+def makeMoveWhite(board):
+    possibleBoardsList = []
+    possibleMovesList = []
+    bestPossibleMove = [] #[(),()]
+    bestPossibleScore = 0
+    DEPTH = 2 # MAX TRAVERSAL DEPTH OF TREE - set to 1 for testing purposes
+    print("TESTING 44:", boardCheck(board,7,1,6,3,2,attackingPieces1))
+    print("testing 45:", boardCheck(board,7,7,0,7,2,attackingPieces1))
+    for i in range(len(board)):
+        for j in range(len(board[0])):
+            if board[i][j] != "_" and board[i][j].islower():
+                print("check 45")
+                storeMoves = moveGenerator(i,j,1)
+                # print("STORE MOVES", i,j, storeMoves)
+                if storeMoves:
+                    tempPossibleMoves = [move for move in storeMoves if boardCheck(board,i,j,move[0],move[1],1,attackingPieces2) == 1
+                                         and (board[move[0]][move[1]] == "_" or board[move[0]][move[1]].isupper())]
+                    print(i,j, tempPossibleMoves)
+                    if tempPossibleMoves:
+                        for move in tempPossibleMoves:
+                            subBoard = copy.deepcopy(board)
+                            subBoard[i][j], subBoard[move[0]][move[1]] = "_", subBoard[i][j]
+                            checkVal, attackerPos, kingPos = checkKingSafe(subBoard,1,attackingPieces1)
+                            if checkVal == 0:
+                                possibleBoardsList.append(subBoard)
+                                possibleMovesList.append([i,j,move[0],move[1]])
+    print("check 47")
+    print("BOARDS:")
+    for i in possibleBoardsList:
+        for j in i:
+            print(j,end="\n")
+        print("\n")
+
+    print("MOVES:",possibleMovesList)
+    bestPossibleMove = possibleMovesList[0]
+    bestPossibleScore = evaluatePosWhite(possibleBoardsList[0], -sys.maxsize, sys.maxsize, DEPTH, 2)
+    print("check 48")
+    # Call evaluatePos on each board config possible and if score is higher then reset the highestPossible Score
+    for i in range(len(possibleBoardsList)):
+        tempScore = evaluatePosWhite(possibleBoardsList[i],-sys.maxsize,sys.maxsize,DEPTH,2)
+        if tempScore >= bestPossibleScore:
+            bestPossibleMove = possibleMovesList[i]
+            bestPossibleScore = tempScore
+        print("PROCESSING {} out of possible {} results".format(i,len(possibleBoardsList)))
+    print("BEST MOVE:", bestPossibleMove)
+    return bestPossibleMove
+
+
+
+
+
+def evaluatePosWhite(board, alpha, beta, depth, playerNo):
+    if depth == 0:
+        evaluation = evaluationFunctionWhite(board)
+        # print("EVAL:", evaluation)
+        return evaluation
+
+    if playerNo == 2:
+        moves = []
+        for i in range(len(board)):
+            for j in range(len(board[0])):
+                if board[i][j] != "_" and board[i][j].isupper():
+                    storeMoves = moveGenerator(i, j, 2)
+                    if storeMoves:
+                        tempPossibleMoves = [(i,j) + move for move in storeMoves if
+                                             boardCheck(board, i, j, move[0], move[1], 2, attackingPieces1) == 1 and
+                                             (board[move[0]][move[1]] == "_" or board[move[0]][move[1]].islower())]
+                        if tempPossibleMoves:
+                            moves.extend(tempPossibleMoves)
+
+        tempBeta = beta
+        for move in moves:
+            subBoard = copy.deepcopy(board)
+            subBoard[move[0]][move[1]], subBoard[move[2]][move[3]] = "_", subBoard[move[0]][move[1]]
+            checkVal, attackerPos, kingPos = checkKingSafe(subBoard, 2, attackingPieces2)
+            if checkVal == 0:
+                tempBeta = min(tempBeta, evaluatePosWhite(subBoard, alpha, beta, depth-1, 1))
+                if tempBeta <= alpha:
+                    break
+        return tempBeta
+
+    else:
+        moves = []
+        for i in range(len(board)):
+            for j in range(len(board[0])):
+                if board[i][j] != "_" and board[i][j].islower():
+                    storeMoves = moveGenerator(i, j, 1)
+                    if storeMoves:
+                        tempPossibleMoves = [(i, j) + move for move in storeMoves if
+                                             boardCheck(board, i, j, move[0], move[1], 1, attackingPieces2) == 1 and
+                                             (board[move[0]][move[1]] == "_" or board[move[0]][move[1]].isupper())]
+                        # print("temp Moves",tempPossibleMoves)
+                        if tempPossibleMoves:
+                            moves.extend(tempPossibleMoves)
+
+        tempAlpha = alpha
+        for move in moves:
+            subBoard = copy.deepcopy(board)
+            subBoard[move[0]][move[1]], subBoard[move[2]][move[3]] = "_", subBoard[move[0]][move[1]]
+            checkVal, attackerPos, kingPos = checkKingSafe(subBoard, 1, attackingPieces1)
+            if checkVal == 0:
+                tempAlpha = max(tempAlpha, evaluatePosWhite(subBoard, alpha, beta, depth - 1, 2))
+                if tempAlpha >= beta:
+                    break
+        return tempAlpha
+
+
+def evaluationFunctionWhite(board):
+    whiteScore = 0
+    blackScore = 0
+
+    checkVal1, attackerPos1, kingPos1 = checkKingSafe(board,1,attackingPieces1)
+    checkVal2, attackerPos2, kingPos2 = checkKingSafe(board,2,attackingPieces2)
+    if checkVal1 == 1:
+        whiteScore = -10000
+    if checkVal2 == 1:
+        blackScore = -10000
+
+    for i in range(len(board)):
+        for j in range(len(board[0])):
+            if board[i][j] != "_":
+                if board[i][j].islower():
+                    if board[i][j] == "q":
+                        whiteScore += 900
+                        whiteScore += WhiteQueenSquareTableFinal[i][j]
+                    elif board[i][j] == "r":
+                        whiteScore += 500
+                        whiteScore += WhiteRookSquareTableFinal[i][j]
+                    elif board[i][j] == "k":
+                        whiteScore += 320
+                        whiteScore += WhiteKnightSquareTableFinal[i][j]
+                    elif board[i][j] == "b":
+                        whiteScore += 330
+                        whiteScore += WhiteBishopSquareTableFinal[i][j]
+                    elif board[i][j] == "p":
+                        whiteScore += 100
+                        whiteScore += WhitePawnSquareTableFinal[i][j]
+                    elif board[i][j] == "ki":
+                        whiteScore += 10000
+                else:
+                    if board[i][j] == "Q":
+                        blackScore += 900
+                        blackScore += BlackQueenSquareTableFinal[i][j]
+                    elif board[i][j] == "R":
+                        blackScore += 500
+                        blackScore += BlackRookSquareTableFinal[i][j]
+                    elif board[i][j] == "K":
+                        blackScore += 320
+                        blackScore += BlackKnightSquareTableFinal[i][j]
+                    elif board[i][j] == "B":
+                        blackScore += 330
+                        blackScore += BlackBishopSquareTableFinal[i][j]
+                    elif board[i][j] == "P":
+                        blackScore += 100
+                        blackScore += BlackPawnSquareTableFinal[i][j]
+                    elif board[i][j] == "KI":
+                        blackScore += 10000
+
+    # print("BLACK SCORE:", blackScore)
+    # print("WHITE SCORE:", whiteScore)
+
+    return whiteScore-blackScore
 
 
 #############################################################################################################################################
