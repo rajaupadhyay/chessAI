@@ -921,6 +921,7 @@ def evaluationFunction(board):
                         whiteScore += WhitePawnSquareTableFinal[i][j]
                     elif board[i][j] == "ki":
                         whiteScore += 10000
+
                 else:
                     if board[i][j] == "Q":
                         blackScore += 900
