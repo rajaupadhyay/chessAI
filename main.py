@@ -858,7 +858,7 @@ def evaluatePos(board, alpha, beta, depth, playerNo):
             subBoard[move[0]][move[1]], subBoard[move[2]][move[3]] = "_", subBoard[move[0]][move[1]]
             checkVal, attackerPos, kingPos = checkKingSafe(subBoard, 1, attackingPieces1)
             if checkVal == 0:
-                tempBeta = min(tempBeta, evaluatePos(subBoard, alpha, beta, depth-1, 2))
+                tempBeta = min(tempBeta, evaluatePos(subBoard, alpha, tempBeta, depth-1, 2))
                 if tempBeta <= alpha:
                     break
         return tempBeta
@@ -883,7 +883,7 @@ def evaluatePos(board, alpha, beta, depth, playerNo):
             subBoard[move[0]][move[1]], subBoard[move[2]][move[3]] = "_", subBoard[move[0]][move[1]]
             checkVal, attackerPos, kingPos = checkKingSafe(subBoard, 2, attackingPieces2)
             if checkVal == 0:
-                tempAlpha = max(tempAlpha, evaluatePos(subBoard, alpha, beta, depth - 1, 1))
+                tempAlpha = max(tempAlpha, evaluatePos(subBoard, tempAlpha, beta, depth - 1, 1))
                 if tempAlpha >= beta:
                     break
         return tempAlpha
