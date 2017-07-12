@@ -207,6 +207,11 @@ def play():
             print(i + 1, end=" ")
             print(board[i])
 
+        if counter != preVal:
+            game.PrintMessage("Last move: {} to {}".format((piecePosx, piecePosy), (targetPosx, targetPosy)))
+            if buffer != "_":
+                game.PrintMessage("Captured piece:" + buffer)
+
         game.Draw(board)
 
 #############################################################################################################################################
@@ -835,7 +840,8 @@ def makeMove(board):
 
 def evaluatePos(board, alpha, beta, depth, playerNo):
     if depth == 0:
-        evaluation = evaluationFunction(board)
+        # evaluation = evaluationFunction(board)
+        evaluation = quis(board,alpha,beta)
         # print("EVAL:", evaluation)
         return evaluation
 
