@@ -947,6 +947,39 @@ def evaluationFunction(board):
     return blackScore-whiteScore
 
 
+def quis(board, alpha, beta): # Quiescence searching
+    eval = evaluationFunction(board)
+    if eval >= beta:
+        return beta
+    alpha = max(alpha, eval)
+
+    moves = []
+
+    for i in range(len(board)):
+        for j in range(len(board[0])):
+            if board[i][j] != "_" and board[i][j].isupper():
+                storeMoves = moveGenerator(i, j, 2)
+                if storeMoves:
+                    tempPossibleMoves = [(i, j) + move for move in storeMoves if
+                                         boardCheck(board, i, j, move[0], move[1], 2, attackingPieces1) == 1 and
+                                         (board[move[0]][move[1]] != "_" and board[move[0]][move[1]].islower())]
+                    # print("temp Moves",tempPossibleMoves)
+                    if tempPossibleMoves:
+                        moves.extend(tempPossibleMoves)
+
+    for move in moves:
+        subBoard = copy.deepcopy(board)
+        subBoard[move[0]][move[1]], subBoard[move[2]][move[3]] = "_", subBoard[move[0]][move[1]]
+        checkVal, attackerPos, kingPos = checkKingSafe(subBoard, 2, attackingPieces2)
+        if checkVal == 0:
+            score = -quis(subBoard,-beta,-alpha)
+            if score >= beta:
+                return beta
+            alpha = max(alpha, score)
+
+    return alpha
+
+
 
 #############################################################################################################################################
 if __name__ == "__main__":
