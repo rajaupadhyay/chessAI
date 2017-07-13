@@ -253,40 +253,40 @@ def checkKingSafe(board1, playerNo, attackingPieces):
     if KINGY-1>=0:
         if KINGX-2>=0:
             if board1[KINGX-2][KINGY-1] == attackingPieces[4]:
-                print('here19')
+                # print('here19')
                 return 1, (KINGX-2,KINGY-1), (KINGX,KINGY)
         if KINGX+2<8:
             if board1[KINGX+2][KINGY-1] == attackingPieces[4]:
-                print('here20')
+                # print('here20')
                 return 1, (KINGX+2,KINGY-1), (KINGX,KINGY)
     if KINGY-2>=0:
         if KINGX-1>=0:
             if board1[KINGX-1][KINGY-2] == attackingPieces[4]:
-                print('here21')
+                # print('here21')
                 return 1, (KINGX-1,KINGY-2), (KINGX,KINGY)
         if KINGX+1<8:
             if board1[KINGX+1][KINGY-2] == attackingPieces[4]:
-                print('here22')
+                # print('here22')
                 return 1, (KINGX+1,KINGY-2), (KINGX,KINGY)
 
     if KINGY+1<8:
         if KINGX-2>=0:
             if board1[KINGX-2][KINGY+1] == attackingPieces[4]:
-                print('here23')
+                # print('here23')
                 return 1, (KINGX-2,KINGY+1), (KINGX,KINGY)
         if KINGX+2<8:
             if board1[KINGX+2][KINGY+1] == attackingPieces[4]:
-                print('here24')
+                # print('here24')
                 return 1, (KINGX+2,KINGY+1), (KINGX,KINGY)
 
     if KINGY+2<8:
         if KINGX-1>=0:
             if board1[KINGX-1][KINGY+2] == attackingPieces[4]:
-                print('here25')
+                # print('here25')
                 return 1, (KINGX-1,KINGY+2), (KINGX,KINGY)
         if KINGX+1<8:
             if board1[KINGX+1][KINGY+2] == attackingPieces[4]:
-                print('here26')
+                # print('here26')
                 return 1, (KINGX+1,KINGY+2), (KINGX,KINGY)
 
 
@@ -378,7 +378,7 @@ def boardCheck(board1,pieceX,pieceY,targetX,targetY,playerNo,yourPieces):
         # print("000")
         if playerNo == 1:
             if board1[pieceX][pieceY] == 'p':
-                if targetY == pieceY:
+                if targetY == pieceY and pieceX+1<8:
                     if board1[pieceX + 1][pieceY] == '_':
                         if pieceX == 1 and targetX == 3 and board1[targetX][targetY] == "_":
                             return 1
@@ -388,12 +388,12 @@ def boardCheck(board1,pieceX,pieceY,targetX,targetY,playerNo,yourPieces):
                         return 0
 
                 elif abs(targetY - pieceY) == 1 and (targetX - pieceX) == 1:
-                    if board1[targetX][targetY].isupper():
+                    if 0<=targetX<8 and 0<=targetY<8 and board1[targetX][targetY].isupper():
                         return 1
 
         if playerNo == 2:
             if board1[pieceX][pieceY] == 'P':
-                if targetY == pieceY:
+                if targetY == pieceY and pieceX-1>=0:
                     if board1[pieceX - 1][pieceY] == '_':
                         if pieceX == 6 and targetX == 4 and board1[targetX][targetY] == "_":
                             return 1
@@ -797,9 +797,9 @@ def makeMove(board):
     possibleMovesList = []
     bestPossibleMove = [] #[(),()]
     bestPossibleScore = 0
-    DEPTH = 2 # MAX TRAVERSAL DEPTH OF TREE - set to 1 for testing purposes
-    print("TESTING 44:", boardCheck(board,7,1,6,3,2,attackingPieces1))
-    print("testing 45:", boardCheck(board,7,7,0,7,2,attackingPieces1))
+    DEPTH = 3 # MAX TRAVERSAL DEPTH OF TREE - set to 1 for testing purposes
+    # print("TESTING 44:", boardCheck(board,7,1,6,3,2,attackingPieces1))
+    # print("testing 45:", boardCheck(board,7,7,0,7,2,attackingPieces1))
     for i in range(len(board)):
         for j in range(len(board[0])):
             if board[i][j] != "_" and board[i][j].isupper():
@@ -821,27 +821,33 @@ def makeMove(board):
     print("check 47")
     # print("BOARDS:",possibleBoardsList)
     # print("MOVES:",possibleMovesList)
-    bestPossibleMove = possibleMovesList[0]
-    bestPossibleScore = evaluatePos(possibleBoardsList[0], -sys.maxsize, sys.maxsize, DEPTH, 1)
-    print("check 48")
-    # Call evaluatePos on each board config possible and if score is higher then reset the highestPossible Score
-    for i in range(len(possibleBoardsList)):
-        tempScore = evaluatePos(possibleBoardsList[i],-sys.maxsize,sys.maxsize,DEPTH,1)
-        if tempScore >= bestPossibleScore:
-            bestPossibleMove = possibleMovesList[i]
-            bestPossibleScore = tempScore
-        print("PROCESSING {} out of possible {} results".format(i,len(possibleBoardsList)))
-    print("BEST MOVE:", bestPossibleMove)
-    return bestPossibleMove
-
-
-
+    if possibleMovesList:
+        bestPossibleMove = possibleMovesList[0]
+        bestPossibleScore = evaluatePos(possibleBoardsList[0], -sys.maxsize, sys.maxsize, DEPTH, 1)
+        print("check 48")
+        # Call evaluatePos on each board config possible and if score is higher then reset the highestPossible Score
+        for i in range(len(possibleBoardsList)):
+            tempScore = evaluatePos(possibleBoardsList[i],-sys.maxsize,sys.maxsize,DEPTH,1)
+            if tempScore >= bestPossibleScore:
+                bestPossibleMove = possibleMovesList[i]
+                bestPossibleScore = tempScore
+            print("PROCESSING {} out of possible {} results".format(i,len(possibleBoardsList)))
+        print("BEST MOVE:", bestPossibleMove)
+        return bestPossibleMove
+    else:
+        game.PrintMessage("GAME OVER")
+        game.Draw(board)
+        print("**************GAME OVER**************")
+        time.sleep(30)
+        pygame.quit()
+        sys.exit(0)
 
 
 def evaluatePos(board, alpha, beta, depth, playerNo):
     if depth == 0:
-        # evaluation = evaluationFunction(board)
-        evaluation = quis(board,alpha,beta)
+        # evaluation = evaluationFunction(board,2)
+        # print("ALPHA: {}".format(alpha))
+        evaluation = quis(board,alpha,beta, playerNo, 0)
         # print("EVAL:", evaluation)
         return evaluation
 
@@ -895,7 +901,7 @@ def evaluatePos(board, alpha, beta, depth, playerNo):
         return tempAlpha
 
 
-def evaluationFunction(board):
+def evaluationFunction(board, playerNo):
     whiteScore = 0
     blackScore = 0
 
@@ -949,41 +955,109 @@ def evaluationFunction(board):
 
     # print("BLACK SCORE:", blackScore)
     # print("WHITE SCORE:", whiteScore)
+    if playerNo == 2:
+        return blackScore-whiteScore
+    else:
+        return whiteScore-blackScore
 
-    return blackScore-whiteScore
+
+# def quis(board, alpha, beta): # Quiescence searching
+#     eval = evaluationFunction(board)
+#     if eval >= beta:
+#         return beta
+#     alpha = max(alpha, eval)
+#
+#     moves = []
+#
+#     for i in range(len(board)):
+#         for j in range(len(board[0])):
+#             if board[i][j] != "_" and board[i][j].isupper():
+#                 storeMoves = moveGenerator(i, j, 2)
+#                 if storeMoves:
+#                     tempPossibleMoves = [(i, j) + move for move in storeMoves if
+#                                          boardCheck(board, i, j, move[0], move[1], 2, attackingPieces1) == 1 and
+#                                          (board[move[0]][move[1]] != "_" and board[move[0]][move[1]].islower())]
+#                     # print("temp Moves",tempPossibleMoves)
+#                     if tempPossibleMoves:
+#                         moves.extend(tempPossibleMoves)
+#
+#     for move in moves:
+#         subBoard = copy.deepcopy(board)
+#         subBoard[move[0]][move[1]], subBoard[move[2]][move[3]] = "_", subBoard[move[0]][move[1]]
+#         checkVal, attackerPos, kingPos = checkKingSafe(subBoard, 2, attackingPieces2)
+#         if checkVal == 0:
+#             score = quis(subBoard,alpha,beta)   # -quis(subBoard,-beta,-alpha)
+#             if score >= beta:
+#                 return beta
+#             alpha = max(alpha, score)
+#
+#     return alpha
 
 
-def quis(board, alpha, beta): # Quiescence searching
-    eval = evaluationFunction(board)
-    if eval >= beta:
+def quis(board, alpha, beta, playerNo, depth):
+    evaluation = evaluationFunction(board,playerNo)
+
+    if evaluation >= beta:
         return beta
-    alpha = max(alpha, eval)
+    # if depth >= 12:
+    #     return alpha
+
+
+    # Delta pruning
+    BIG_DELTA = 900
+    if evaluation < alpha-BIG_DELTA:
+        return alpha
+
+    if alpha < evaluation:
+        alpha = evaluation
+
+    opposition = 1 if playerNo == 2 else 2
 
     moves = []
-
-    for i in range(len(board)):
-        for j in range(len(board[0])):
-            if board[i][j] != "_" and board[i][j].isupper():
-                storeMoves = moveGenerator(i, j, 2)
-                if storeMoves:
-                    tempPossibleMoves = [(i, j) + move for move in storeMoves if
-                                         boardCheck(board, i, j, move[0], move[1], 2, attackingPieces1) == 1 and
-                                         (board[move[0]][move[1]] != "_" and board[move[0]][move[1]].islower())]
-                    # print("temp Moves",tempPossibleMoves)
-                    if tempPossibleMoves:
-                        moves.extend(tempPossibleMoves)
+    if playerNo == 2:
+        for i in range(len(board)):
+            for j in range(len(board[0])):
+                if board[i][j] != "_" and board[i][j].isupper():
+                    storeMoves = moveGenerator(i, j, 2)
+                    if storeMoves:
+                        tempPossibleMoves = [(i, j) + move for move in storeMoves if
+                                             boardCheck(board, i, j, move[0], move[1], 2, attackingPieces1) == 1 and
+                                             (board[move[0]][move[1]] != "_" and board[move[0]][move[1]].islower())]
+                        # print("temp Moves",tempPossibleMoves)
+                        if tempPossibleMoves:
+                            moves.extend(tempPossibleMoves)
+    else:
+        for i in range(len(board)):
+            for j in range(len(board[0])):
+                if board[i][j] != "_" and board[i][j].islower():
+                    storeMoves = moveGenerator(i, j, 1)
+                    if storeMoves:
+                        tempPossibleMoves = [(i, j) + move for move in storeMoves if
+                                             boardCheck(board, i, j, move[0], move[1], 1, attackingPieces2) == 1 and
+                                             (board[move[0]][move[1]] != "_" and board[move[0]][move[1]].isupper())]
+                        # print("temp Moves",tempPossibleMoves)
+                        if tempPossibleMoves:
+                            moves.extend(tempPossibleMoves)
 
     for move in moves:
         subBoard = copy.deepcopy(board)
         subBoard[move[0]][move[1]], subBoard[move[2]][move[3]] = "_", subBoard[move[0]][move[1]]
-        checkVal, attackerPos, kingPos = checkKingSafe(subBoard, 2, attackingPieces2)
+        if playerNo == 1:
+            checkVal, attackerPos, kingPos = checkKingSafe(subBoard, 1, attackingPieces1)
+        else:
+            checkVal, attackerPos, kingPos = checkKingSafe(subBoard, 2, attackingPieces2)
         if checkVal == 0:
-            score = -quis(subBoard,-beta,-alpha)
+            score = quis(subBoard,alpha,beta,opposition, depth+1)   # -quis(subBoard,-beta,-alpha)
             if score >= beta:
                 return beta
             alpha = max(alpha, score)
 
+    # print("Quiescence search depth {}".format(depth))
+
     return alpha
+
+
+
 
 
 
