@@ -1,7 +1,6 @@
 # chessAI
-Chess AI in Python
 ***
-<p style="text-align: justify;">
+<p align="justify">
 Built a chess AI that uses various heuristics to play decent chess.
 The AI evaluates boards and positions using material score and piece square tables. It makes use of the mini-max algorithm with ALpha-Beta Pruning
 to eliminate "bad moves". To avoid the Horizon problem i have made use of quiescence search with a minor tweaking of Delta pruning to ensure
