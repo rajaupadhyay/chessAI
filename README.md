@@ -4,7 +4,7 @@
 Built a chess AI that uses various heuristics to play decent chess.
 The AI evaluates boards and positions using material score and piece square tables. It makes use of the mini-max algorithm with Alpha-Beta Pruning
 to eliminate "bad moves". To avoid the Horizon problem i have made use of quiescence search with a minor tweaking of Delta pruning to ensure
-the tree only expands up to a certain depth. Tested the engine against Stockfish - Can comfortably play and defeat the stockfish engine up to level 4 (out of 8 possible levels) with 
+the tree only expands up to a certain depth. Tested the engine against Stockfish - Can play and defeat the stockfish engine up to level 4 (out of 8 possible levels) with 
 a win/loss ratio of 60/40. The engine easily loses in levels beyond 4 where the W/L ratio drops to around 35/65.
 The engine was tested in 100 games at varying depths of minimax. 
 
