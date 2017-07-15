@@ -14,6 +14,8 @@ preVal = -1
 board = []
 attackingPieces1 = ["KI","R","B","Q","K"]
 attackingPieces2 = ["ki","r","b","q","k"]
+openingMoves = []
+
 # WHITE PIECES ARE LOWERCASE AND BLACK PIECES ARE UPPERCASE
 def initialise():
     row8 = [piecesDict["ROOK"].lower(), piecesDict["KNIGHT"].lower(), piecesDict["BISHOP"].lower(),
@@ -105,34 +107,34 @@ def play():
         else: # AI Player (MM with Alpha Beta Pruning of set depth of 2)
             val = 0
             while val == 0:
-                checked, attacker, myKingPos = checkKingSafe(board,flag,attackingPieces2)
-                if checked == 1:
-                    possibleToPlay, pieces, target = getOutOfCheck(1)
-                    piecePosx, piecePosy = pieces[0], pieces[1]
-                    targetPosx, targetPosy = target[0], target[1]
-                    break
+                # checked, attacker, myKingPos = checkKingSafe(board,flag,attackingPieces2)
+                # if checked == 1:
+                #     possibleCounters = getOutOfCheck(1)
+                #     piecePosx, piecePosy = possibleCounters[0][0], possibleCounters[0][1]
+                #     targetPosx, targetPosy = possibleCounters[0][2], possibleCounters[0][3]
+                #     break
+                # else:
+                if counter > 2:
+                    piecePosx, piecePosy, targetPosx, targetPosy = makeMove(board)
+                    print("AI MOVES: {}{} to {}{}".format(piecePosx,piecePosy,targetPosx,targetPosy))
+                    val = 1
                 else:
-                    if counter > 2:
-                        piecePosx, piecePosy, targetPosx, targetPosy = makeMove(board)
-                        print("AI MOVES: {}{} to {}{}".format(piecePosx,piecePosy,targetPosx,targetPosy))
-                        val = 1
-                    else:
-                        piecePosx = random.randint(0,7)
-                        print("X",piecePosx)
-                        pieceList = [j for j in range(0,8) if board[piecePosx][j]!="_" and board[piecePosx][j].isupper()]
-                        print("PIECE LIST:",pieceList)
-                        if pieceList:
-                            piecePosy = pieceList[random.randint(0,len(pieceList)-1)]
+                    piecePosx = random.randint(0,7)
+                    print("X",piecePosx)
+                    pieceList = [j for j in range(0,8) if board[piecePosx][j]!="_" and board[piecePosx][j].isupper()]
+                    print("PIECE LIST:",pieceList)
+                    if pieceList:
+                        piecePosy = pieceList[random.randint(0,len(pieceList)-1)]
 
-                        targetList = moveGenerator(piecePosx, piecePosy, flag)
-                        print("TARGETS:", targetList)
-                        if targetList:
-                            randMove = targetList[random.randint(0,len(targetList)-1)]
-                            print(randMove)
-                            if board[randMove[0]][randMove[1]].islower() or board[randMove[0]][randMove[1]] == '_':
-                                targetPosx = randMove[0]
-                                targetPosy = randMove[1]
-                                val = 1
+                    targetList = moveGenerator(piecePosx, piecePosy, flag)
+                    print("TARGETS:", targetList)
+                    if targetList:
+                        randMove = targetList[random.randint(0,len(targetList)-1)]
+                        print(randMove)
+                        if board[randMove[0]][randMove[1]].islower() or board[randMove[0]][randMove[1]] == '_':
+                            targetPosx = randMove[0]
+                            targetPosy = randMove[1]
+                            val = 1
 
 
 
@@ -194,9 +196,14 @@ def play():
             counter -= 1
 ###################################################################################################################################################
 
-        q,w,e = getOutOfCheck(flag)
+        qwe = getOutOfCheck(flag)
 
         # GAME OVER
+
+        if board[targetPosx][targetPosy] == "p" and targetPosx == 7:
+            board[targetPosx][targetPosy] = "q"
+        elif board[targetPosx][targetPosy] == "P" and targetPosx == 0:
+            board[targetPosx][targetPosy] = "Q"
 
         counter += 1
         print("X", end=" ")
@@ -228,6 +235,17 @@ def checkKingSafe(board1, playerNo, attackingPieces):
         if tempKing in board1[i]:
             KINGX, KINGY = i, board1[i].index(tempKing)
     # print(KINGX,KINGY)
+
+    eightPos = []
+    eightPos.extend((KINGX, KINGY+kingy) for kingy in [-1,1])
+    eightPos.extend((KINGX+kingx, KINGY) for kingx in [-1,1])
+    eightPos.extend([(KINGX-1, KINGY-1), (KINGX-1, KINGY+1), (KINGX+1,KINGY-1), (KINGX+1,KINGY+1)])
+    eightPos = [move for move in eightPos if 0<=move[0]<8 and 0<=move[1]<8]
+
+    for move in eightPos:
+        if board1[move[0]][move[1]] == attackingPieces[0]:
+            return 1, (move[0], move[1]), (KINGX, KINGY)
+
 
     if init == 0:
         if playerNo == 1:
@@ -651,8 +669,8 @@ def getOutOfCheck(flag):
     else:
         binVal, attackerpos, kingPos = checkKingSafe(board, 1, attackingPieces1)
     tempBoard = copy.deepcopy(board)
-    print("attacker Position: {}".format(attackerpos))
-    print("King position: {}".format(kingPos))
+    # print("attacker Position: {}".format(attackerpos))
+    # print("King position: {}".format(kingPos))
 
     # 1st check
     if flag == 1:
@@ -667,7 +685,7 @@ def getOutOfCheck(flag):
         yourPiecesP = yourPieces+["p"]
 
     binVal1, q1, q2 = checkKingSafe(tempBoard, tempPlayer, tempAttackingPieces)
-
+    allPossibleCounters = []
     if binVal1 == 1:
         global playerSafe
         playerSafe = 0
@@ -678,19 +696,19 @@ def getOutOfCheck(flag):
                            (kingPos[0] + 1, kingPos[1] - 1), (kingPos[0] + 1, kingPos[1] + 1)])
 
 
-        print("YOUR PIECES: ", yourPieces)
+        # print("YOUR PIECES: ", yourPieces)
         eightMoves = [move for move in eightMoves if (0 <= move[0] < 8 and 0 <= move[1] < 8)]
         eightMoves = [move for move in eightMoves if tempBoard[move[0]][move[1]] not in yourPiecesP]
         # ((tempBoard[move[0]][move[1]].islower() and tempBoard[kingPos[0]][
         #     kingPos[1]].isupper()) or
         #  (tempBoard[move[0]][move[1]].isupper() and tempBoard[kingPos[0]][
         #      kingPos[1]].islower()))
-        print("THE MOVES:", eightMoves)
+        # print("THE MOVES:", eightMoves)
 
         for move in eightMoves:
-            print("MOVE:", move)
+            # print("MOVE:", move)
             if boardCheck(tempBoard, kingPos[0], kingPos[1], move[0], move[1], tempPlayer, yourPieces) == 1:
-                print("BOARD CHECK PASS FOR MOVE:", move)
+                # print("BOARD CHECK PASS FOR MOVE:", move)
                 subBoard = copy.deepcopy(tempBoard)
                 # validateAndMove(subBoard,kingPos[0],kingPos[1],move[0],move[1],tempPlayer,tempAttackingPieces)
                 subBoard[move[0]][move[1]] = subBoard[kingPos[0]][kingPos[1]]
@@ -698,8 +716,9 @@ def getOutOfCheck(flag):
                 a, b, c = checkKingSafe(subBoard, tempPlayer, tempAttackingPieces)
                 if a == 0:
                     playerSafe = 1  # Player is safe
-                    print("SAFE CHECK 1")
-                    return 1, (kingPos[0],kingPos[1]), (move[0],move[1])
+                    # print("SAFE CHECK 1")
+                    allPossibleCounters.append((kingPos[0],kingPos[1],move[0],move[1]))
+                    # return 1, (kingPos[0],kingPos[1]), (move[0],move[1])
 
         # 2nd check - derive structure from playerSafe variable - build position board for all pieces.
 
@@ -717,7 +736,8 @@ def getOutOfCheck(flag):
                             a, b, c = checkKingSafe(subBoard, tempPlayer, tempAttackingPieces)
                             if a == 0:
                                 playerSafe = 2
-                                return 1, (i,j), (attackerpos[0], attackerpos[1])
+                                allPossibleCounters.append((i, j, attackerpos[0], attackerpos[1]))
+                                # return 1, (i,j), (attackerpos[0], attackerpos[1])
 
 
         # 3rd Check - Try intercept attacker
@@ -772,7 +792,8 @@ def getOutOfCheck(flag):
                         a, b, c = checkKingSafe(subBoard, tempPlayer, tempAttackingPieces)
                         if a == 0:
                             playerSafe = 3
-                            return 1, (ret[0], ret[1]), (pos[0], pos[1])
+                            allPossibleCounters.append((ret[0], ret[1], pos[0], pos[1]))
+                            # return 1, (ret[0], ret[1]), (pos[0], pos[1])
 
         print("***PLAYER SAFE: {}".format(playerSafe))
 
@@ -783,14 +804,15 @@ def getOutOfCheck(flag):
             time.sleep(30)
             pygame.quit()
             sys.exit(0)
+        return allPossibleCounters
+
     else:
-        return -1, (-1,-1), (-1,-1)
+        return []
 
 
 
 #############################################################################################################################################
 
-# AI Related Functions (Initial implementation of AI through minimax algo with alpha beta pruning)
 
 def makeMove(board):
     possibleBoardsList = []
@@ -800,24 +822,36 @@ def makeMove(board):
     DEPTH = 3 # MAX TRAVERSAL DEPTH OF TREE - set to 1 for testing purposes
     # print("TESTING 44:", boardCheck(board,7,1,6,3,2,attackingPieces1))
     # print("testing 45:", boardCheck(board,7,7,0,7,2,attackingPieces1))
-    for i in range(len(board)):
-        for j in range(len(board[0])):
-            if board[i][j] != "_" and board[i][j].isupper():
-                print("check 45")
-                storeMoves = moveGenerator(i,j,2)
-                # print("STORE MOVES", i,j, storeMoves)
-                if storeMoves:
-                    tempPossibleMoves = [move for move in storeMoves if boardCheck(board,i,j,move[0],move[1],2,attackingPieces1) == 1
-                                         and (board[move[0]][move[1]] == "_" or board[move[0]][move[1]].islower())]
-                    print(i,j, tempPossibleMoves)
-                    if tempPossibleMoves:
-                        for move in tempPossibleMoves:
-                            subBoard = copy.deepcopy(board)
-                            subBoard[i][j], subBoard[move[0]][move[1]] = "_", subBoard[i][j]
-                            checkVal, attackerPos, kingPos = checkKingSafe(subBoard,2,attackingPieces2)
-                            if checkVal == 0:
-                                possibleBoardsList.append(subBoard)
-                                possibleMovesList.append([i,j,move[0],move[1]])
+
+    checkVal2, attackerPos2, kingPos2 = checkKingSafe(board, 2, attackingPieces2)
+    if checkVal2 == 0:
+        for i in range(len(board)):
+            for j in range(len(board[0])):
+                if board[i][j] != "_" and board[i][j].isupper():
+                    print("check 45")
+                    storeMoves = moveGenerator(i,j,2)
+                    # print("STORE MOVES", i,j, storeMoves)
+                    if storeMoves:
+                        tempPossibleMoves = [move for move in storeMoves if boardCheck(board,i,j,move[0],move[1],2,attackingPieces1) == 1
+                                             and (board[move[0]][move[1]] == "_" or board[move[0]][move[1]].islower())]
+                        print(i,j, tempPossibleMoves)
+                        if tempPossibleMoves:
+                            for move in tempPossibleMoves:
+                                subBoard = copy.deepcopy(board)
+                                subBoard[i][j], subBoard[move[0]][move[1]] = "_", subBoard[i][j]
+                                checkVal, attackerPos, kingPos = checkKingSafe(subBoard,2,attackingPieces2)
+                                if checkVal == 0:
+                                    possibleBoardsList.append(subBoard)
+                                    possibleMovesList.append([i,j,move[0],move[1]])
+    else:
+        possibleCounters = getOutOfCheck(1)
+        # IMPLEMENT BOARDS FOR COUNTER CHECK MOVES
+        for counter in possibleCounters:
+            subBoard = copy.deepcopy(board)
+            subBoard[counter[0]][counter[1]], subBoard[counter[2]][counter[3]] = subBoard[counter[2]][counter[3]], subBoard[counter[0]][counter[1]]
+            possibleBoardsList.append(subBoard)
+        possibleMovesList.extend(possibleCounters)
+
     print("check 47")
     # print("BOARDS:",possibleBoardsList)
     # print("MOVES:",possibleMovesList)
@@ -845,29 +879,40 @@ def makeMove(board):
 
 def evaluatePos(board, alpha, beta, depth, playerNo):
     if depth == 0:
-        # evaluation = evaluationFunction(board,2)
+        # evaluation1 = evaluationFunction(board,2)
         # print("ALPHA: {}".format(alpha))
-        evaluation = quis(board,alpha,beta, playerNo, 0)
-        # print("EVAL:", evaluation)
-        return evaluation
+        evaluation2 = quis(board,alpha,beta,playerNo, 0)  # -quis(board,alpha,beta,playerNo, 0)
+        # print("EVAL1: {} EVAL2: {}".format(evaluation1, evaluation2))
+        # return min(evaluation1, evaluation2)
+        return evaluation2
+
+    checkVal1, attackerPos1, kingPos1 = checkKingSafe(board, 1, attackingPieces1)
+    checkVal2, attackerPos2, kingPos2 = checkKingSafe(board, 2, attackingPieces2)
+
 
     if playerNo == 1:
         moves = []
-        for i in range(len(board)):
-            for j in range(len(board[0])):
-                if board[i][j] != "_" and board[i][j].islower():
-                    storeMoves = moveGenerator(i, j, 1)
-                    if storeMoves:
-                        tempPossibleMoves = [(i,j) + move for move in storeMoves if
-                                             boardCheck(board, i, j, move[0], move[1], 1, attackingPieces2) == 1 and
-                                             (board[move[0]][move[1]] == "_" or board[move[0]][move[1]].isupper())]
-                        if tempPossibleMoves:
-                            moves.extend(tempPossibleMoves)
+        if checkVal1 == 0:
+            for i in range(len(board)):
+                for j in range(len(board[0])):
+                    if board[i][j] != "_" and board[i][j].islower():
+                        storeMoves = moveGenerator(i, j, 1)
+                        if storeMoves:
+                            tempPossibleMoves = [(i,j) + move for move in storeMoves if
+                                                 boardCheck(board, i, j, move[0], move[1], 1, attackingPieces2) == 1 and
+                                                 (board[move[0]][move[1]] == "_" or board[move[0]][move[1]].isupper())]
+                            if tempPossibleMoves:
+                                moves.extend(tempPossibleMoves)
+        else:
+            possibleCounters = getOutOfCheck(2)
+            moves.extend(possibleCounters)
 
         tempBeta = beta
         for move in moves:
             subBoard = copy.deepcopy(board)
             subBoard[move[0]][move[1]], subBoard[move[2]][move[3]] = "_", subBoard[move[0]][move[1]]
+            if subBoard[move[2]][move[3]] == "p" and move[2] == 7:
+                subBoard[move[2]][move[3]] = "q"
             checkVal, attackerPos, kingPos = checkKingSafe(subBoard, 1, attackingPieces1)
             if checkVal == 0:
                 tempBeta = min(tempBeta, evaluatePos(subBoard, alpha, tempBeta, depth-1, 2))
@@ -877,22 +922,28 @@ def evaluatePos(board, alpha, beta, depth, playerNo):
 
     else:
         moves = []
-        for i in range(len(board)):
-            for j in range(len(board[0])):
-                if board[i][j] != "_" and board[i][j].isupper():
-                    storeMoves = moveGenerator(i, j, 2)
-                    if storeMoves:
-                        tempPossibleMoves = [(i, j) + move for move in storeMoves if
-                                             boardCheck(board, i, j, move[0], move[1], 2, attackingPieces1) == 1 and
-                                             (board[move[0]][move[1]] == "_" or board[move[0]][move[1]].islower())]
-                        # print("temp Moves",tempPossibleMoves)
-                        if tempPossibleMoves:
-                            moves.extend(tempPossibleMoves)
+        if checkVal2 == 0:
+            for i in range(len(board)):
+                for j in range(len(board[0])):
+                    if board[i][j] != "_" and board[i][j].isupper():
+                        storeMoves = moveGenerator(i, j, 2)
+                        if storeMoves:
+                            tempPossibleMoves = [(i, j) + move for move in storeMoves if
+                                                 boardCheck(board, i, j, move[0], move[1], 2, attackingPieces1) == 1 and
+                                                 (board[move[0]][move[1]] == "_" or board[move[0]][move[1]].islower())]
+                            # print("temp Moves",tempPossibleMoves)
+                            if tempPossibleMoves:
+                                moves.extend(tempPossibleMoves)
+        else:
+            possibleCounters = getOutOfCheck(1)
+            moves.extend(possibleCounters)
 
         tempAlpha = alpha
         for move in moves:
             subBoard = copy.deepcopy(board)
             subBoard[move[0]][move[1]], subBoard[move[2]][move[3]] = "_", subBoard[move[0]][move[1]]
+            if subBoard[move[2]][move[3]] == "P" and move[2] == 0:
+                subBoard[move[2]][move[3]] = "Q"
             checkVal, attackerPos, kingPos = checkKingSafe(subBoard, 2, attackingPieces2)
             if checkVal == 0:
                 tempAlpha = max(tempAlpha, evaluatePos(subBoard, tempAlpha, beta, depth - 1, 1))
@@ -994,60 +1045,78 @@ def evaluationFunction(board, playerNo):
 #     return alpha
 
 
-def quis(board, alpha, beta, playerNo, depth):
+def quis(board, alpha, beta, playerNo, depth):  # Quiescence searching
     evaluation = evaluationFunction(board,playerNo)
 
     if evaluation >= beta:
         return beta
-    # if depth >= 12:
+    # if depth >= 10:
     #     return evaluation
 
 
-    # Delta pruning
-    BIG_DELTA = 900
-    if evaluation < alpha-BIG_DELTA:
-        return alpha
+    # # Delta pruning
+    # BIG_DELTA = 900
+    # if evaluation < alpha-BIG_DELTA:
+    #     return alpha
 
     if alpha < evaluation:
         alpha = evaluation
 
     opposition = 1 if playerNo == 2 else 2
 
+    checkVal1, attackerPos1, kingPos1 = checkKingSafe(board, 1, attackingPieces1)
+    checkVal2, attackerPos2, kingPos2 = checkKingSafe(board, 2, attackingPieces2)
+
     moves = []
     if playerNo == 2:
-        for i in range(len(board)):
-            for j in range(len(board[0])):
-                if board[i][j] != "_" and board[i][j].isupper():
-                    storeMoves = moveGenerator(i, j, 2)
-                    if storeMoves:
-                        tempPossibleMoves = [(i, j) + move for move in storeMoves if
-                                             boardCheck(board, i, j, move[0], move[1], 2, attackingPieces1) == 1 and
-                                             (board[move[0]][move[1]] != "_" and board[move[0]][move[1]].islower())]
-                        # print("temp Moves",tempPossibleMoves)
-                        if tempPossibleMoves:
-                            moves.extend(tempPossibleMoves)
+        if checkVal2 == 0:
+            for i in range(len(board)):
+                for j in range(len(board[0])):
+                    if board[i][j] != "_" and board[i][j].isupper():
+                        storeMoves = moveGenerator(i, j, 2)
+                        if storeMoves:
+                            tempPossibleMoves = [(i, j) + move for move in storeMoves if
+                                                 boardCheck(board, i, j, move[0], move[1], 2, attackingPieces1) == 1 and
+                                                 (board[move[0]][move[1]] != "_" and board[move[0]][move[1]].islower())]
+                            # print("temp Moves",tempPossibleMoves)
+                            if tempPossibleMoves:
+                                moves.extend(tempPossibleMoves)
+        else:
+            possibleCounters = getOutOfCheck(1)
+            moves.extend(possibleCounters)
+
+
     else:
-        for i in range(len(board)):
-            for j in range(len(board[0])):
-                if board[i][j] != "_" and board[i][j].islower():
-                    storeMoves = moveGenerator(i, j, 1)
-                    if storeMoves:
-                        tempPossibleMoves = [(i, j) + move for move in storeMoves if
-                                             boardCheck(board, i, j, move[0], move[1], 1, attackingPieces2) == 1 and
-                                             (board[move[0]][move[1]] != "_" and board[move[0]][move[1]].isupper())]
-                        # print("temp Moves",tempPossibleMoves)
-                        if tempPossibleMoves:
-                            moves.extend(tempPossibleMoves)
+        if checkVal1 == 0:
+            for i in range(len(board)):
+                for j in range(len(board[0])):
+                    if board[i][j] != "_" and board[i][j].islower():
+                        storeMoves = moveGenerator(i, j, 1)
+                        if storeMoves:
+                            tempPossibleMoves = [(i, j) + move for move in storeMoves if
+                                                 boardCheck(board, i, j, move[0], move[1], 1, attackingPieces2) == 1 and
+                                                 (board[move[0]][move[1]] != "_" and board[move[0]][move[1]].isupper())]
+                            # print("temp Moves",tempPossibleMoves)
+                            if tempPossibleMoves:
+                                moves.extend(tempPossibleMoves)
+        else:
+            possibleCounters = getOutOfCheck(2)
+            moves.extend(possibleCounters)
+
 
     for move in moves:
         subBoard = copy.deepcopy(board)
         subBoard[move[0]][move[1]], subBoard[move[2]][move[3]] = "_", subBoard[move[0]][move[1]]
         if playerNo == 1:
+            if subBoard[move[2]][move[3]] == "p" and move[2] == 7:
+                subBoard[move[2]][move[3]] = "q"
             checkVal, attackerPos, kingPos = checkKingSafe(subBoard, 1, attackingPieces1)
         else:
+            if subBoard[move[2]][move[3]] == "P" and move[2] == 0:
+                subBoard[move[2]][move[3]] = "Q"
             checkVal, attackerPos, kingPos = checkKingSafe(subBoard, 2, attackingPieces2)
         if checkVal == 0:
-            score = quis(subBoard,alpha,beta,opposition, depth+1)   # -quis(subBoard,-beta,-alpha)
+            score = -quis(subBoard,-beta,-alpha,opposition, depth+1)   # -quis(subBoard,-beta,-alpha)
             if score >= beta:
                 return beta
             alpha = max(alpha, score)
