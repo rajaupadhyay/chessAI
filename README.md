@@ -9,9 +9,9 @@ a win/loss ratio of 60/40. The engine easily loses in levels beyond 4 where the 
 The engine was tested in 100 games at varying depths of minimax. 
 
 The following are the future improvements i would like to work on:
-1) Implement Razoring: Instead of skipping an entire subtree (what alpha beta does) i would like to search the subtree to a reduce depth: Ideally DEPTH-1.
-This will help in redcuing the overall risk.
-2) Transposition tables (dictionary/database that can store results of searches performed before to help save time by reducing the search space.
+1) Implement Razoring: Instead of skipping an entire subtree (what alpha beta does) i would like to search the subtree to a reduced depth: Ideally DEPTH-1.
+This will help in reducing the overall risk.
+2) Transposition tables (dictionary/database that can store results of searches performed before to help save time by reducing the search space.)
 3) Improve the basic search function to allow larger depth searches.
-4) Try implement the engine using Neural Networks when i actually understand how the work.
+4) Try implement the engine using Neural Networks when i actually understand how they work.
 </p>
