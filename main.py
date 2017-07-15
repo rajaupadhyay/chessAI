@@ -879,12 +879,12 @@ def makeMove(board):
 
 def evaluatePos(board, alpha, beta, depth, playerNo):
     if depth == 0:
-        # evaluation1 = evaluationFunction(board,2)
+        evaluation1 = evaluationFunction(board,2)
         # print("ALPHA: {}".format(alpha))
         evaluation2 = quis(board,alpha,beta,playerNo, 0)  # -quis(board,alpha,beta,playerNo, 0)
         # print("EVAL1: {} EVAL2: {}".format(evaluation1, evaluation2))
-        # return min(evaluation1, evaluation2)
-        return evaluation2
+        return min(evaluation1, evaluation2)
+        # return evaluation2
 
     checkVal1, attackerPos1, kingPos1 = checkKingSafe(board, 1, attackingPieces1)
     checkVal2, attackerPos2, kingPos2 = checkKingSafe(board, 2, attackingPieces2)
