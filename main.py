@@ -17,7 +17,7 @@ attackingPieces2 = ["ki","r","b","q","k"]
 # WHITE PIECES ARE LOWERCASE AND BLACK PIECES ARE UPPERCASE
 def initialise():
     row8 = [piecesDict["ROOK"].lower(), piecesDict["KNIGHT"].lower(), piecesDict["BISHOP"].lower(),
-            piecesDict["QUEEN"].lower(), piecesDict["KING"].lower(),
+            piecesDict["KING"].lower(), piecesDict["QUEEN"].lower(),
             piecesDict["BISHOP"].lower(), piecesDict["KNIGHT"].lower(), piecesDict["ROOK"].lower()]
     board.append(row8)
     row7 = ["p" for _ in range(8)]
@@ -1000,7 +1000,7 @@ def quis(board, alpha, beta, playerNo, depth):
     if evaluation >= beta:
         return beta
     # if depth >= 12:
-    #     return alpha
+    #     return evaluation
 
 
     # Delta pruning
@@ -1064,14 +1064,14 @@ def quis(board, alpha, beta, playerNo, depth):
 #############################################################################################################################################
 if __name__ == "__main__":
     game = gui.ChessGUI_pygame()
-    testBoard = [['r', 'k', 'b', 'q', 'ki', 'b', 'k', 'r'],
+    testBoard = [['r', 'k', 'b', 'ki', 'q', 'b', 'k', 'r'],
                  ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
                  ['e', 'e', 'e', 'e', 'e', 'e', 'e', 'e'],
                  ['e', 'e', 'e', 'e', 'e', 'e', 'e', 'e'],
                  ['e', 'e', 'e', 'e', 'e', 'e', 'e', 'e'],
                  ['e', 'e', 'e', 'e', 'e', 'e', 'e', 'e'],
                  ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
-                 ['R', 'K', 'B', 'Q', 'KI', 'B', 'K', 'R']]
+                 ['R', 'K', 'B', 'KI', 'Q', 'B', 'K', 'R']]
 
     game.Draw(testBoard)
     initialise()
